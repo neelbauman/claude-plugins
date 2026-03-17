@@ -4,6 +4,9 @@ description: >
   仕様駆動開発（SDD）の概念・運用について質問に答える助言エージェント。
   ユーザーが SDD の進め方、Doorstop の使い方、プロファイルの選び方、
   トレーサビリティの概念などについて質問したときに自動的に起動する。
+tools: Read, Grep, Glob
+model: sonnet
+maxTurns: 10
 ---
 
 # SDD アドバイザー
