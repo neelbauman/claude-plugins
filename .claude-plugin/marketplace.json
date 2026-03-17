@@ -1,0 +1,20 @@
+{
+  "name": "claude-plugins",
+  "owner": {
+    "name": "adelie"
+  },
+  "metadata": {
+    "description": "Claude Code プラグインマーケットプレイス",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "doorstop-spec-driven",
+      "source": "./plugins/doorstop-spec-driven-plugin",
+      "description": "仕様駆動開発（Specification-Driven Development）プラグイン。Doorstopによる要件→仕様→実装→テストの全ライフサイクルをエージェントが自律的に管理する。",
+      "version": "1.0.0",
+      "keywords": ["doorstop", "spec-driven", "requirements", "traceability", "sdd"],
+      "category": "development-workflow"
+    }
+  ]
+}
