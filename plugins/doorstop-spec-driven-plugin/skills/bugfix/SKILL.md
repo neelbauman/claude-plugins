@@ -5,31 +5,179 @@ description: >
   「バグを直して」「〜が動かない」「エラーが出る」「不具合がある」
   「〜がおかしい」のようなバグ修正リクエストでトリガーする。
   原因特定→仕様/実装バグ判別→修正→再発防止テスト→検証を自律的に実行する。
+context: fork
 ---
 
-# [C] バグ修正フロー
+# バグ修正フロー
 
-## 初動
+## 鉄則
 
-1. **共通ルールを読む**: `${CLAUDE_PLUGIN_ROOT}/references/common_rules.md`
-2. **フロー手順を読む**: `${CLAUDE_PLUGIN_ROOT}/references/flows/bugfix.md`
-3. **操作リファレンスを読む**: `${CLAUDE_PLUGIN_ROOT}/references/doorstop_reference.md`
+1. コードを書く前に設計文書を書く（adopt フローのみ例外）
+2. 振る舞い定義には `gherkin` 属性で Given/When/Then を書く
+3. テストを書いたら TST を書く（常にペア）
+4. 変更したら `impact_analysis.py` を回す
+5. 最後に `validate_and_report.py --strict` を必ず実行する
+6. 仕様変更時は `--serve` でダッシュボードを起動しレビューを促す
+7. 関連アイテムの探索には `trace_query.py` を使う（YAML を grep しない）
+8. 派生要求（`derived: true`）は設計層のみ。IMPL/TST では禁止
+9. 外部ファイル紐付けには `references` を使う（`ref` は非推奨）
+10. 仕様変更のコミットはドキュメント層ごとに分ける
+11. 新ドメイン概念には `glossary.py add` で用語辞書を更新する
+12. 重要な設計判断は ADR に記録する
 
-## 概要
+## エージェント規約
 
-バグの報告や修正要望があったときのフロー。
-仕様バグか実装バグかを判別し、適切な修正手順に進む。
+- 非規範的アイテム（見出し・背景）は `--non-normative` で作成
+- 報告は成果物ベースで簡潔に（Doorstop 内部構造は見せない）
+- 初動で `doorstop_ops.py <dir> tree` を実行し、ツリー構造を動的に把握する
+- 最下位設計文書 = IMPL/TST がリンクする直接の親（lite: SPEC, standard: SPEC, full: LLD）
+
+## プロファイル
+
+| プロファイル | 階層 |
+|---|---|
+| lite | REQ → SPEC → IMPL/TST · ADR |
+| standard | REQ/NFR → ARCH → SPEC → IMPL/TST · ADR |
+| full | REQ/NFR → HLD → LLD → IMPL/TST · ADR |
+
+## スクリプト実行形式
+
+`uv run python ${CLAUDE_PLUGIN_ROOT}/scripts/<script>.py <project-dir> ...`
+
+---
 
 ## フロー
 
-フロー手順の詳細は `${CLAUDE_PLUGIN_ROOT}/references/flows/bugfix.md` に従う。
+### 1. 原因特定
 
-要約:
-1. 原因特定（`trace_query.py chain --file`）
-2. 仕様バグ vs 実装バグの判別
-   - 仕様バグ → `/doorstop-spec-driven:change` フローへ移行
-   - 実装バグ → 以下を続行
-3. コード修正
-4. 再発防止テスト追加
-5. IMPL更新・検証
-6. コミット・報告
+バグの再現条件を確認し、関連するコード・設計文書・アイテムを特定する。
+
+```bash
+# ファイルパスから関連アイテムを逆引き
+trace_query.py <dir> chain --file <buggy-file-path>
+
+# テキスト検索で関連アイテムを探す
+doorstop_ops.py <dir> find "関連キーワード"
+```
+
+### 2. 仕様バグか実装バグかを判別
+
+| 種別 | 定義 | 対応 |
+|---|---|---|
+| **仕様バグ** | 設計通りに動作しているが、ユーザーの期待と異なる | → `/doorstop-spec-driven:change` フローへ移行 |
+| **実装バグ** | 設計と実装が乖離している | → 以下のステップを続行 |
+
+判別方法：
+1. SPEC（または ARCH/HLD/LLD）のアイテムを読み、仕様上の期待動作を確認
+2. 実際の動作と仕様を比較
+3. 仕様通りなら**仕様バグ**、仕様と異なるなら**実装バグ**
+
+### 3. コード修正
+
+実装バグの場合、SPEC に記述された仕様に合致するようにコードを修正する。
+
+- 仕様に曖昧さがある場合は、修正と併せて SPEC のエッジケースや振る舞いを明確化する
+- 修正範囲が広がる場合は `impact_analysis.py --changed <UID>` で影響を確認
+
+### 4. 再発防止テスト追加
+
+バグの再現テストを書き、修正後に通ることを確認する。
+
+- テストは「バグが再発した場合に検知できる」ことが目的
+- Gherkin がある SPEC の場合、再現シナリオを gherkin 属性に追記することも検討
+
+### 5. IMPL 更新
+
+必要に応じて IMPL アイテムの text を更新する。バグ修正の経緯や設計判断を記録。
+
+```bash
+doorstop_ops.py <dir> update IMPL001 -t "更新後のテキスト（バグ修正の経緯を追記）"
+```
+
+### 6. 検証
+
+```bash
+# テスト実行
+uv run pytest tests/ -x -q
+
+# トレーサビリティ検証
+validate_and_report.py <dir> --strict
+```
+
+### 7. コミット
+
+ドキュメント層ごとにコミットを分ける。順序はプロジェクトの慣習に従う。
+
+```bash
+# テスト + TST アイテム
+git add tests/test_xxx.py docs/tst/TST0XX.yml
+git commit -m "test: TST0XX regression test for [bug summary]"
+
+# バグ修正 + IMPL アイテム更新
+git add src/module.py docs/impl/IMPL001.yml
+git commit -m "fix: IMPL001 [bug summary]"
+
+# SPEC 明確化がある場合
+git add docs/specs/SPEC001.yml
+git commit -m "spec: clarify SPEC001 edge case for [bug]"
+```
+
+### 8. 報告
+
+修正内容と再発防止策を報告する。
+
+---
+
+## コマンドクイックリファレンス
+
+```bash
+# チェーン逆引き（ファイルから）
+trace_query.py <dir> chain --file <path>
+
+# テキスト検索
+doorstop_ops.py <dir> find "キーワード"
+
+# TST 追加
+doorstop_ops.py <dir> add -d TST -t "テスト説明" -g GROUP \
+  --references '[{"path":"tests/test_xxx.py","type":"file"}]' --links SPEC001
+
+# アイテム更新
+doorstop_ops.py <dir> update <UID> -t "テキスト"
+
+# 影響分析
+impact_analysis.py <dir> --changed <UID>
+
+# 検証
+validate_and_report.py <dir> --strict
+```
+
+詳細は `${CLAUDE_PLUGIN_ROOT}/references/doorstop_reference.md` を参照。
+
+---
+
+## TST テンプレート（簡易版）
+
+```bash
+doorstop_ops.py <dir> add -d TST \
+  -t "## 目的
+バグ再現テスト: [バグの概要]
+
+## 検証観点
+- TC-1: [再現手順と期待結果]" \
+  -g GROUP \
+  --references '[{"path":"tests/test_xxx.py","type":"file"}]' --links SPEC001
+```
+
+詳細なテンプレートは `${CLAUDE_PLUGIN_ROOT}/references/item_writing_guide.md` を参照。
+
+---
+
+## 報告テンプレート
+
+```
+[GROUP] バグを修正しました。
+  - 原因: [仕様バグ/実装バグ] — [原因の説明]
+  - 修正: src/xxx.py — [修正内容]
+  - 再発防止: tests/test_xxx.py — テスト追加
+  - トレーサビリティ: 全リンク済み、suspect 0件
+```

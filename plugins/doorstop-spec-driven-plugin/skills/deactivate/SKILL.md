@@ -7,28 +7,107 @@ description: >
   物理削除ではなく active: false によるソフトデリートと連鎖処理を行う。
 ---
 
-# [G] 非活性化フロー
+# 非活性化フロー
 
-## 初動
+## 鉄則
 
-1. **共通ルールを読む**: `${CLAUDE_PLUGIN_ROOT}/references/common_rules.md`
-2. **フロー手順を読む**: `${CLAUDE_PLUGIN_ROOT}/references/flows/deactivation.md`
-3. **操作リファレンスを読む**: `${CLAUDE_PLUGIN_ROOT}/references/doorstop_reference.md`
+1. コードを書く前に設計文書を書く（adopt フローのみ例外）
+2. 振る舞い定義には `gherkin` 属性で Given/When/Then を書く
+3. テストを書いたら TST を書く（常にペア）
+4. 変更したら `impact_analysis.py` を回す
+5. 最後に `validate_and_report.py --strict` を必ず実行する
+6. 仕様変更時は `--serve` でダッシュボードを起動しレビューを促す
+7. 関連アイテムの探索には `trace_query.py` を使う（YAML を grep しない）
+8. 派生要求（`derived: true`）は設計層のみ。IMPL/TST では禁止
+9. 外部ファイル紐付けには `references` を使う（`ref` は非推奨）
+10. 仕様変更のコミットはドキュメント層ごとに分ける
+11. 新ドメイン概念には `glossary.py add` で用語辞書を更新する
+12. 重要な設計判断は ADR に記録する
 
-## 概要
+## エージェント規約
 
-機能削除や要件取り下げの要望があったときのフロー。
-アイテムは物理削除せず、`active: false` で管理する。
+- 非規範的アイテム（見出し・背景）は `--non-normative` で作成
+- 報告は成果物ベースで簡潔に（Doorstop 内部構造は見せない）
+- 初動で `doorstop_ops.py <dir> tree` を実行し、ツリー構造を動的に把握する
+- 最下位設計文書 = IMPL/TST がリンクする直接の親（lite: SPEC, standard: SPEC, full: LLD）
+
+## プロファイル
+
+| プロファイル | 階層 |
+|---|---|
+| lite | REQ → SPEC → IMPL/TST · ADR |
+| standard | REQ/NFR → ARCH → SPEC → IMPL/TST · ADR |
+| full | REQ/NFR → HLD → LLD → IMPL/TST · ADR |
+
+## スクリプト実行形式
+
+`uv run python ${CLAUDE_PLUGIN_ROOT}/scripts/<script>.py <project-dir> ...`
+
+---
 
 ## フロー
 
-フロー手順の詳細は `${CLAUDE_PLUGIN_ROOT}/references/flows/deactivation.md` に従う。
+### 1. 影響確認
 
-要約:
-1. 影響確認（`trace_query.py chain <UID>`）
-2. ユーザー確認（非活性化対象と影響範囲を提示）
-3. チェーン非活性化（`doorstop_ops.py deactivate-chain <UID>`）
-4. 検証（`validate_and_report.py --strict`）
-5. 報告
+```bash
+trace_query.py <dir> chain <UID>
+```
 
-再活性化: `doorstop_ops.py activate-chain <UID>`
+下流アイテムを確認する。
+
+### 2. ユーザー確認
+
+非活性化対象と影響範囲をユーザーに提示し、合意を得る。
+
+### 3. チェーン非活性化
+
+```bash
+doorstop_ops.py <dir> deactivate-chain <UID>
+```
+
+- 下流アイテムのうち、他に活性な親を持たないものも連鎖的に非活性化される
+- 他に活性な親があっても強制する場合は `--force`
+
+### 4. 検証
+
+```bash
+validate_and_report.py <dir> --strict
+```
+
+### 5. 報告
+
+非活性化されたアイテム数と影響範囲を報告する。
+
+## 再活性化
+
+取り下げた要件を復活させる場合:
+
+```bash
+doorstop_ops.py <dir> activate-chain <UID>
+```
+
+## 注意事項
+
+- 物理削除（YAML ファイルの削除）は行わない。`active: false` で管理する
+- 非活性化アイテムはカバレッジ計算やバリデーションから除外される
+- `baseline_manager.py diff` で非活性化の記録を追跡できる
+
+---
+
+## コマンドクイックリファレンス
+
+```bash
+# チェーン確認
+trace_query.py <dir> chain <UID>
+
+# チェーン非活性化
+doorstop_ops.py <dir> deactivate-chain <UID> [--force]
+
+# チェーン活性化（復活）
+doorstop_ops.py <dir> activate-chain <UID>
+
+# 検証
+validate_and_report.py <dir> --strict
+```
+
+詳細は `${CLAUDE_PLUGIN_ROOT}/references/doorstop_reference.md` を参照。
