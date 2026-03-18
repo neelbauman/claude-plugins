@@ -5,5 +5,18 @@
   "keywords": ["doorstop", "spec-driven", "requirements", "traceability", "sdd"],
   "skills": "./skills/",
   "agents": "./agents/",
-  "hooks": "./hooks/hooks.json"
+  "hooks": "./hooks/hooks.json",
+  "mcpServers": {
+    "sdd": {
+      "command": "uv",
+      "args": [
+        "run",
+        "--directory", "${CLAUDE_PLUGIN_ROOT}",
+        "python", "${CLAUDE_PLUGIN_ROOT}/scripts/mcp_server.py"
+      ],
+      "env": {
+        "PYTHONPATH": "${CLAUDE_PLUGIN_ROOT}/scripts/core:${CLAUDE_PLUGIN_ROOT}/scripts"
+      }
+    }
+  }
 }
