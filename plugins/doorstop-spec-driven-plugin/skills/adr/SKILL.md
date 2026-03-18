@@ -146,6 +146,17 @@ ADR054 を作成しました。
 
 ## コマンドクイックリファレンス
 
+### MCP ツール（推奨）
+
+| 操作 | MCP ツール |
+|---|---|
+| ADR 追加 | `sdd_add_item(project_dir, document="ADR", text, header, group, links)` |
+| ステータス更新 | `sdd_update_item(project_dir, uid, ...)` |
+| レビュー | `sdd_review(project_dir, uids)` |
+| チェーン確認 | `sdd_chain(project_dir, uid)` / `sdd_chain(project_dir, file=PATH)` |
+
+### CLI フォールバック
+
 ```bash
 # ADR 追加
 doorstop_ops.py <dir> add -d ADR -t "本文" --header "見出し" -g GROUP --links UID...

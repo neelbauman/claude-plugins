@@ -3,7 +3,7 @@ name = "doorstop-spec-driven-plugin"
 version = "1.0.0"
 description = "仕様駆動開発（Specification-Driven Development）プラグイン"
 requires-python = ">=3.10"
-dependencies = ["doorstop"]
+dependencies = ["doorstop", "mcp[cli]"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

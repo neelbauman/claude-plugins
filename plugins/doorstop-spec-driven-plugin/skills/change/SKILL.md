@@ -1,18 +1,19 @@
 ---
 name: change
 description: >
-  既存の仕様・設計・実装に対する変更を行うフロー。
-  「〜を変更して」「〜を修正して」「仕様を変えたい」「リファクタリングして」
-  「〜を改善して」のような既存機能の変更リクエストでトリガーする。
+  既存の仕様・設計・実装に対する意図的な変更を行うフロー。
+  「仕様を変えたい」「振る舞いを変えたい」「機能を改善して」「リファクタリングして」
+  「〜を変更して」「〜を修正して」「インターフェースを変えたい」
+  のような意図的な仕様変更・機能改善リクエストでトリガーする。
+  仕様変更を伴わないバグ修正（症状報告）は bugfix を参照。
   影響分析→設計更新→実装・テスト修正→検証の手順で進める。
 argument-hint: "<変更内容の説明>"
 context: fork
 hooks:
   Stop:
     - hooks:
-        - type: prompt
-          prompt: "validate_and_report.py --strict を実行してエラー0件・suspect 0件を確認しましたか？"
-          model: haiku
+        - type: command
+          command: "${CLAUDE_PLUGIN_ROOT}/hooks/stop-validate.sh"
 ---
 
 # 変更フロー
@@ -133,6 +134,20 @@ git commit -m "spec: clear suspects IMPL001 TST001"
 ---
 
 ## コマンドクイックリファレンス
+
+### MCP ツール（推奨）
+
+| 操作 | MCP ツール |
+|---|---|
+| アイテム更新 | `sdd_update_item(project_dir, uid, text, gherkin)` |
+| 影響分析 | `sdd_impact(project_dir, changed_uids=[UID])` |
+| suspect 自動検出 | `sdd_impact(project_dir, detect_suspects=True)` |
+| チェーン確認 | `sdd_chain(project_dir, uid=UID)` / `sdd_chain(project_dir, file=PATH)` |
+| 一括レビュー | `sdd_chain_review(project_dir, uids)` |
+| suspect 一括解消 | `sdd_chain_clear(project_dir, uids)` |
+| 検証 | `sdd_validate(project_dir)` |
+
+### CLI フォールバック
 
 ```bash
 # アイテム更新

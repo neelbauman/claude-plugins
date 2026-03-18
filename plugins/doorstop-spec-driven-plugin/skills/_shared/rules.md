@@ -32,4 +32,31 @@
 
 ## スクリプト実行形式
 
-`uv run python ${CLAUDE_PLUGIN_ROOT}/scripts/<script>.py <project-dir> ...`
+**MCP ツール（推奨）**: `sdd_*` ツールを直接呼び出す（MCP サーバー `sdd` 経由）。
+
+**CLI フォールバック**: `uv run python ${CLAUDE_PLUGIN_ROOT}/scripts/<script>.py <project-dir> ...`
+
+### MCP ツール一覧
+
+| カテゴリ | MCP ツール | 概要 |
+|---|---|---|
+| **CRUD** | `sdd_add_item` | アイテム追加 |
+| | `sdd_update_item` | アイテム更新 |
+| | `sdd_link` / `sdd_unlink` | リンク管理 |
+| | `sdd_reorder` | レベル変更 |
+| **レビュー** | `sdd_clear` / `sdd_review` | suspect解消・レビュー |
+| | `sdd_chain_review` / `sdd_chain_clear` | チェーン一括 |
+| **活性化** | `sdd_activate` / `sdd_deactivate` | 単体 |
+| | `sdd_activate_chain` / `sdd_deactivate_chain` | チェーン |
+| **照会** | `sdd_status` | プロジェクトサマリ |
+| | `sdd_chain` | チェーン表示・ファイル逆引き |
+| | `sdd_context` | 全文脈一括取得 |
+| | `sdd_search` | 属性フィルタ付き検索 |
+| | `sdd_coverage` / `sdd_suspects` / `sdd_gaps` | 品質メトリクス |
+| | `sdd_backlog` | 優先度順バックログ |
+| | `sdd_list` / `sdd_groups` / `sdd_find` / `sdd_tree` | 一覧・検索 |
+| **検証** | `sdd_validate` | バリデーション |
+| **影響分析** | `sdd_impact` | 変更影響分析 |
+| **ベースライン** | `sdd_baseline_create` / `sdd_baseline_list` / `sdd_baseline_diff` | スナップショット管理 |
+| **用語辞書** | `sdd_glossary_add` / `sdd_glossary_list` / `sdd_glossary_check` 等 | 用語管理 |
+| **初期化** | `sdd_init` | プロジェクト初期化 |

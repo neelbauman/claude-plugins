@@ -9,9 +9,36 @@
             "command": "${CLAUDE_PLUGIN_ROOT}/hooks/block-yaml-edit.sh"
           }
         ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/block-doorstop-cli.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "Grep",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/warn-yaml-grep.sh"
+          }
+        ]
       }
     ],
     "SessionStart": [
+      {
+        "matcher": "startup|resume",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/session-start-status.sh"
+          }
+        ]
+      },
       {
         "matcher": "compact",
         "hooks": [

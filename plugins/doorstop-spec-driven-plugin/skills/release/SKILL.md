@@ -84,6 +84,19 @@ baseline_manager.py <dir> create <version> --tag
 
 ## コマンドクイックリファレンス
 
+### MCP ツール（推奨）
+
+| 操作 | MCP ツール |
+|---|---|
+| バリデーション | `sdd_validate(project_dir)` |
+| カバレッジ | `sdd_coverage(project_dir)` |
+| suspect 検出 | `sdd_impact(project_dir, detect_suspects=True)` |
+| ステータス確認 | `sdd_status(project_dir)` |
+| ベースライン作成 | `sdd_baseline_create(project_dir, name, tag=True)` |
+| ベースライン一覧 | `sdd_baseline_list(project_dir)` |
+
+### CLI フォールバック
+
 ```bash
 # バリデーション
 validate_and_report.py <dir> --strict

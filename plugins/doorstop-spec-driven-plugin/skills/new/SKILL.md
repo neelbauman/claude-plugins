@@ -10,9 +10,8 @@ context: fork
 hooks:
   Stop:
     - hooks:
-        - type: prompt
-          prompt: "validate_and_report.py --strict を実行してエラー0件を確認しましたか？"
-          model: haiku
+        - type: command
+          command: "${CLAUDE_PLUGIN_ROOT}/hooks/stop-validate.sh"
 ---
 
 # 新規開発フロー
@@ -115,6 +114,19 @@ git commit -m "test: TST0XX [summary]"
 ---
 
 ## コマンドクイックリファレンス
+
+### MCP ツール（推奨）
+
+| 操作 | MCP ツール |
+|---|---|
+| アイテム追加 | `sdd_add_item(project_dir, document, text, group, priority, links, gherkin)` |
+| リンク | `sdd_link(project_dir, child_uid, parent_uid)` |
+| 一括レビュー | `sdd_chain_review(project_dir, uids)` |
+| 検証 | `sdd_validate(project_dir)` |
+| 影響分析 | `sdd_impact(project_dir, detect_suspects=True)` |
+| ツリー構造 | `sdd_tree(project_dir)` |
+
+### CLI フォールバック
 
 ```bash
 # アイテム追加

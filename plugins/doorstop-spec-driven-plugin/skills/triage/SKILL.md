@@ -5,7 +5,7 @@ description: >
   「何から手をつけるか」「優先順位を決めたい」「バックログを整理して」
   「スコープを確定したい」「次に何を実装すべきか」
   のようなトリアージリクエストでトリガーする。
-argument-hint: "[グループ名]"
+argument-hint: "[グループ名 or 省略で全体]"
 allowed-tools: Read, Grep, Glob, Bash
 model: sonnet
 ---
@@ -79,6 +79,18 @@ baseline_manager.py <dir> create <name>
 ---
 
 ## コマンドクイックリファレンス
+
+### MCP ツール（推奨）
+
+| 操作 | MCP ツール |
+|---|---|
+| バックログ確認 | `sdd_backlog(project_dir, group)` |
+| 優先度更新 | `sdd_update_item(project_dir, uid, priority="high")` |
+| カバレッジ確認 | `sdd_coverage(project_dir, group)` |
+| REQ 追加 | `sdd_add_item(project_dir, document="REQ", text, group, priority="high")` |
+| ベースライン | `sdd_baseline_list(project_dir)` / `sdd_baseline_create(project_dir, name)` |
+
+### CLI フォールバック
 
 ```bash
 # バックログ確認

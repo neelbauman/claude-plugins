@@ -4,7 +4,7 @@ description: >
   プロジェクトの状況確認・レポート生成を行うフロー。
   「状況を教えて」「カバレッジは？」「suspectある？」「レポートを見せて」
   「ダッシュボードを起動して」のような状況確認リクエストでトリガーする。
-argument-hint: "[status|coverage|suspects|dashboard]"
+argument-hint: "[概要|カバレッジ|suspect一覧|ダッシュボード]"
 allowed-tools: Read, Grep, Glob, Bash
 context: fork
 model: sonnet
@@ -61,6 +61,23 @@ model: sonnet
 | ベースライン一覧 | `baseline_manager.py <dir> list` |
 | バージョン間差分 | `baseline_manager.py <dir> diff <v1> <v2>` |
 | 現在との差分 | `baseline_manager.py <dir> diff <v1> HEAD` |
+
+---
+
+### MCP ツール（推奨）
+
+| 操作 | MCP ツール |
+|---|---|
+| プロジェクトサマリ | `sdd_status(project_dir)` |
+| チェーン表示 | `sdd_chain(project_dir, uid)` / `sdd_chain(project_dir, file=PATH)` |
+| カバレッジ詳細 | `sdd_coverage(project_dir, group)` |
+| suspect 一覧 | `sdd_suspects(project_dir)` |
+| リンク漏れ検出 | `sdd_gaps(project_dir, document)` |
+| バックログ | `sdd_backlog(project_dir, group)` |
+| バリデーション | `sdd_validate(project_dir)` |
+| 影響分析 | `sdd_impact(project_dir, detect_suspects=True)` |
+| ベースライン一覧 | `sdd_baseline_list(project_dir)` |
+| ベースライン差分 | `sdd_baseline_diff(project_dir, v1, v2)` |
 
 ---
 

@@ -91,6 +91,19 @@ validate_and_report.py <dir> --strict
 
 ## コマンドクイックリファレンス
 
+### MCP ツール（推奨）
+
+| 操作 | MCP ツール |
+|---|---|
+| プロジェクト初期化 | `sdd_init(project_dir, profile, with_nfr)` |
+| ツリー構造確認 | `sdd_tree(project_dir)` |
+| アイテム追加 | `sdd_add_item(project_dir, document, text, group, priority)` |
+| 非規範的アイテム | `sdd_add_item(project_dir, document, text, non_normative=True)` |
+| 用語辞書追加 | `sdd_glossary_add(project_dir, term, definition)` |
+| 検証 | `sdd_validate(project_dir)` |
+
+### CLI フォールバック
+
 ```bash
 # プロジェクト初期化
 init_project.py <dir> --profile <lite|standard|full> [--with-nfr]

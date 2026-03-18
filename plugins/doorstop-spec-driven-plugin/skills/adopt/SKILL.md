@@ -11,9 +11,8 @@ context: fork
 hooks:
   Stop:
     - hooks:
-        - type: prompt
-          prompt: "validate_and_report.py --strict を実行してエラー0件を確認しましたか？"
-          model: haiku
+        - type: command
+          command: "${CLAUDE_PLUGIN_ROOT}/hooks/stop-validate.sh"
 ---
 
 # 初期導入フロー（既存プロジェクトへの適用）
@@ -106,6 +105,19 @@ validate_and_report.py <dir> --strict
 ---
 
 ## コマンドクイックリファレンス
+
+### MCP ツール（推奨）
+
+| 操作 | MCP ツール |
+|---|---|
+| プロジェクト初期化 | `sdd_init(project_dir, profile, with_nfr)` |
+| アイテム追加 | `sdd_add_item(project_dir, document, text, group, links)` |
+| 非規範的アイテム | `sdd_add_item(project_dir, document, text, non_normative=True)` |
+| リンク | `sdd_link(project_dir, child_uid, parent_uid)` |
+| 一括 clear & review | `sdd_chain_clear(project_dir, uids)` / `sdd_chain_review(project_dir, uids)` |
+| 検証 | `sdd_validate(project_dir)` |
+
+### CLI フォールバック
 
 ```bash
 # プロジェクト初期化

@@ -69,6 +69,17 @@ doorstop_ops.py <dir> activate-chain <UID>
 
 ## コマンドクイックリファレンス
 
+### MCP ツール（推奨）
+
+| 操作 | MCP ツール |
+|---|---|
+| チェーン確認 | `sdd_chain(project_dir, uid)` |
+| チェーン非活性化 | `sdd_deactivate_chain(project_dir, uid, force)` |
+| チェーン活性化 | `sdd_activate_chain(project_dir, uid)` |
+| 検証 | `sdd_validate(project_dir)` |
+
+### CLI フォールバック
+
 ```bash
 # チェーン確認
 trace_query.py <dir> chain <UID>

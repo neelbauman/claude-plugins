@@ -2,17 +2,18 @@
 name: bugfix
 description: >
   バグの修正を行うフロー。
-  「バグを直して」「〜が動かない」「エラーが出る」「不具合がある」
-  「〜がおかしい」のようなバグ修正リクエストでトリガーする。
+  「〜が動かない」「エラーが出る」「クラッシュする」「TypeError」「例外が発生」
+  「スタックトレース」「不具合がある」「〜がおかしい」「バグを直して」
+  のような症状・障害報告でトリガーする。
+  「修正して」単体は曖昧なため対象外（change を参照）。
   原因特定→仕様/実装バグ判別→修正→再発防止テスト→検証を自律的に実行する。
 argument-hint: "<バグの説明>"
 context: fork
 hooks:
   Stop:
     - hooks:
-        - type: prompt
-          prompt: "validate_and_report.py --strict を実行してエラー0件を確認しましたか？"
-          model: haiku
+        - type: command
+          command: "${CLAUDE_PLUGIN_ROOT}/hooks/stop-validate.sh"
 ---
 
 # バグ修正フロー
@@ -106,6 +107,19 @@ git commit -m "spec: clarify SPEC001 edge case for [bug]"
 ---
 
 ## コマンドクイックリファレンス
+
+### MCP ツール（推奨）
+
+| 操作 | MCP ツール |
+|---|---|
+| チェーン逆引き | `sdd_chain(project_dir, file=PATH)` |
+| テキスト検索 | `sdd_find(project_dir, query)` |
+| TST 追加 | `sdd_add_item(project_dir, document="TST", text, group, references, links)` |
+| アイテム更新 | `sdd_update_item(project_dir, uid, text)` |
+| 影響分析 | `sdd_impact(project_dir, changed_uids=[UID])` |
+| 検証 | `sdd_validate(project_dir)` |
+
+### CLI フォールバック
 
 ```bash
 # チェーン逆引き（ファイルから）
