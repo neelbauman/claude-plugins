@@ -1,9 +1,9 @@
 {
   "mcpServers": {
     "sdd": {
-      "command": "uv",
+      "command": "uvx",
       "args": [
-        "run",
+        "--with", "doorstop", "--with", "mcp[cli]", 
         "--directory", "${CLAUDE_PLUGIN_ROOT}",
         "python", "-m", "scripts.serve_mcp"
       ],
