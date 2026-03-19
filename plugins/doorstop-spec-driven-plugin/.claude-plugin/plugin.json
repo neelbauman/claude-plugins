@@ -1,10 +1,19 @@
 {
   "name": "doorstop-spec-driven",
-  "version": "2.1.0",
+  "version": "1.0.0",
   "description": "仕様駆動開発（Specification-Driven Development）プラグイン。Doorstopによる要件→仕様→実装→テストの全ライフサイクルをエージェントが自律的に管理する。",
   "keywords": ["doorstop", "spec-driven", "requirements", "traceability", "sdd"],
-  "skills": "./skills/",
-  "agents": "./agents/",
-  "hooks": "./hooks/hooks.json",
-  "mcpServers": "./.mcp.json"
+  "mcpServers": {
+    "sdd": {
+      "command": "uv",
+      "args": [
+        "run",
+        "--directory", "${CLAUDE_PLUGIN_ROOT}",
+        "python", "-m", "scripts.serve_mcp"
+      ],
+      "env": {
+        "PYTHONPATH": "${CLAUDE_PLUGIN_ROOT}/scripts/core:${CLAUDE_PLUGIN_ROOT}/scripts"
+      }
+    }
+  }
 }

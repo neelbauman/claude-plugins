@@ -32,7 +32,7 @@ def register(mcp: FastMCP):
             os.chdir(project_dir)
             tree = get_tree(project_dir)
 
-            from impact_analysis import detect_by_uid, detect_suspects as _detect_suspects, analyze_impact
+            from scripts.core.impact_analysis import detect_by_uid, detect_suspects as _detect_suspects, analyze_impact
 
             changed_map = {}
             if changed_uids:

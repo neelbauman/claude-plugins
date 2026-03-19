@@ -1,13 +1,15 @@
 {
-  "sdd": {
-    "command": "uv",
-    "args": [
-      "run",
-      "--directory", "${CLAUDE_PLUGIN_ROOT}",
-      "python", "${CLAUDE_PLUGIN_ROOT}/scripts/mcp_server.py"
-    ],
-    "env": {
-      "PYTHONPATH": "${CLAUDE_PLUGIN_ROOT}/scripts/core:${CLAUDE_PLUGIN_ROOT}/scripts"
+  "mcpServers": {
+    "sdd": {
+      "command": "uv",
+      "args": [
+        "run",
+        "--directory", "${CLAUDE_PLUGIN_ROOT}",
+        "python", "-m", "scripts.serve_mcp"
+      ],
+      "env": {
+        "PYTHONPATH": "${CLAUDE_PLUGIN_ROOT}/scripts/core:${CLAUDE_PLUGIN_ROOT}/scripts"
+      }
     }
   }
 }

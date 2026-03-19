@@ -2,7 +2,7 @@
 
 from mcp.server.fastmcp import FastMCP
 
-from baseline_manager import cmd_create, cmd_list, cmd_diff
+from scripts.core.baseline_manager import cmd_create, cmd_list, cmd_diff
 
 from ._adapter import call_cmd
 

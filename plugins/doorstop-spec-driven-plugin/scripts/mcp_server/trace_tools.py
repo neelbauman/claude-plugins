@@ -2,10 +2,10 @@
 
 from mcp.server.fastmcp import FastMCP
 
-from _trace_query.chain import cmd_chain, cmd_context, cmd_related_files
-from _trace_query.status import cmd_status, cmd_coverage, cmd_gaps
-from _trace_query.search import cmd_search
-from _trace_query.quality import cmd_suspects, cmd_backlog
+from scripts.core._trace_query.chain import cmd_chain, cmd_context, cmd_related_files
+from scripts.core._trace_query.status import cmd_status, cmd_coverage, cmd_gaps
+from scripts.core._trace_query.search import cmd_search
+from scripts.core._trace_query.quality import cmd_suspects, cmd_backlog
 
 from ._adapter import call_cmd
 
