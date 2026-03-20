@@ -2,10 +2,10 @@
 
 from mcp.server.fastmcp import FastMCP
 
-from scripts.core._doorstop_ops.crud import cmd_add, cmd_update, cmd_reorder, cmd_link, cmd_unlink
-from scripts.core._doorstop_ops.lifecycle import cmd_activate, cmd_deactivate, cmd_activate_chain, cmd_deactivate_chain
-from scripts.core._doorstop_ops.review import cmd_clear, cmd_review, cmd_chain_review, cmd_chain_clear
-from scripts.core._doorstop_ops.query import cmd_list, cmd_groups, cmd_tree, cmd_find
+from ..core._doorstop_ops.crud import cmd_add, cmd_update, cmd_reorder, cmd_link, cmd_unlink
+from ..core._doorstop_ops.lifecycle import cmd_activate, cmd_deactivate, cmd_activate_chain, cmd_deactivate_chain
+from ..core._doorstop_ops.review import cmd_clear, cmd_review, cmd_chain_review, cmd_chain_clear
+from ..core._doorstop_ops.query import cmd_list, cmd_groups, cmd_tree, cmd_find
 
 from ._adapter import call_cmd, call_cmd_write
 

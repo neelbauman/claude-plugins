@@ -1,0 +1,5 @@
+{
+  "enabledPlugins": {
+    "doorstop-spec-driven@neelbauman-plugins": true
+  }
+}

@@ -8,12 +8,10 @@
       "command": "uv",
       "args": [
         "run",
-        "--directory", "${CLAUDE_PLUGIN_ROOT}",
-        "python", "-m", "scripts.serve_mcp"
-      ],
-      "env": {
-        "PYTHONPATH": "${CLAUDE_PLUGIN_ROOT}/scripts/core:${CLAUDE_PLUGIN_ROOT}/scripts"
-      }
+        "--directory",
+        "${CLAUDE_PLUGIN_ROOT}/scripts",
+        "sdd-mcp"
+      ]
     }
   }
 }

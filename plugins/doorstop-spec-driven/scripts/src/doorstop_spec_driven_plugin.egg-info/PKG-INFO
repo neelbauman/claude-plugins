@@ -1,0 +1,7 @@
+Metadata-Version: 2.4
+Name: doorstop-spec-driven-plugin
+Version: 1.0.0
+Summary: 仕様駆動開発（Specification-Driven Development）プラグイン
+Requires-Python: >=3.10
+Requires-Dist: doorstop
+Requires-Dist: mcp[cli]

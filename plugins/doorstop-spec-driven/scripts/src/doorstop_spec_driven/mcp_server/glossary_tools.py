@@ -2,7 +2,7 @@
 
 from mcp.server.fastmcp import FastMCP
 
-from scripts.core.glossary import cmd_add, cmd_update, cmd_remove, cmd_list, cmd_check, cmd_unused
+from ..core.glossary import cmd_add, cmd_update, cmd_remove, cmd_list, cmd_check, cmd_unused
 
 from ._adapter import call_cmd_no_tree
 

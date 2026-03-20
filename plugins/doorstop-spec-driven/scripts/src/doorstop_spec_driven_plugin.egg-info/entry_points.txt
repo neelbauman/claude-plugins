@@ -1,0 +1,2 @@
+[console_scripts]
+sdd-mcp = doorstop_spec_driven.mcp_server.serve_mcp:main

@@ -17,7 +17,7 @@ from datetime import datetime
 try:
     import doorstop
 except ImportError:
-    from scripts.core._common import out
+    from ..core._common import out
     out({"ok": False, "error": "doorstop がインストールされていません"})
 
 from ..core._common import out

@@ -54,7 +54,7 @@ def register(mcp: FastMCP):
             buf = io.StringIO()
             try:
                 with contextlib.redirect_stdout(buf):
-                    from init_project import main as init_main
+                    from ..init_project import main as init_main
                     init_main()
             except SystemExit:
                 pass

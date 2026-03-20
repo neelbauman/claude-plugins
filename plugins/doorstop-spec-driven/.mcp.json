@@ -3,13 +3,11 @@
     "sdd": {
       "command": "uv",
       "args": [
-        "run", "--with", "doorstop", "--with", "mcp[cli]", 
-        "--directory", "${CLAUDE_PLUGIN_ROOT}",
-        "python", "-m", "scripts.serve_mcp"
-      ],
-      "env": {
-        "PYTHONPATH": "${CLAUDE_PLUGIN_ROOT}/scripts/core:${CLAUDE_PLUGIN_ROOT}/scripts"
-      }
+        "run",
+        "--directory",
+        "${CLAUDE_PLUGIN_ROOT}/scripts",
+        "sdd-mcp"
+      ]
     }
   }
 }

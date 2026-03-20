@@ -471,7 +471,7 @@ wheels = [
 [[package]]
 name = "doorstop-spec-driven-plugin"
 version = "1.0.0"
-source = { virtual = "." }
+source = { editable = "." }
 dependencies = [
     { name = "doorstop" },
     { name = "mcp", extra = ["cli"] },

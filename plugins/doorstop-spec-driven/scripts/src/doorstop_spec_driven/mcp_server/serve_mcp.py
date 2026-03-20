@@ -16,13 +16,13 @@ mcp = FastMCP(
 )
 
 # 各モジュールのツールを登録
-from scripts.mcp_server.doorstop_tools import register as register_doorstop
-from scripts.mcp_server.trace_tools import register as register_trace
-from scripts.mcp_server.validate_tools import register as register_validate
-from scripts.mcp_server.impact_tools import register as register_impact
-from scripts.mcp_server.baseline_tools import register as register_baseline
-from scripts.mcp_server.glossary_tools import register as register_glossary
-from scripts.mcp_server.init_tools import register as register_init
+from .doorstop_tools import register as register_doorstop
+from .trace_tools import register as register_trace
+from .validate_tools import register as register_validate
+from .impact_tools import register as register_impact
+from .baseline_tools import register as register_baseline
+from .glossary_tools import register as register_glossary
+from .init_tools import register as register_init
 
 register_doorstop(mcp)
 register_trace(mcp)
@@ -32,5 +32,9 @@ register_baseline(mcp)
 register_glossary(mcp)
 register_init(mcp)
 
-if __name__ == "__main__":
+def main() -> None:
     mcp.run(transport="stdio")
+
+
+if __name__ == "__main__":
+    main()

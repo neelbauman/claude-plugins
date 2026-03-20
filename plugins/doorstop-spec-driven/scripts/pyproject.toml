@@ -5,9 +5,12 @@ description = "仕様駆動開発（Specification-Driven Development）プラグ
 requires-python = ">=3.10"
 dependencies = ["doorstop", "mcp[cli]"]
 
+[project.scripts]
+sdd-mcp = "doorstop_spec_driven.mcp_server.serve_mcp:main"
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-pythonpath = ["scripts/core", "scripts", "tests"]
+pythonpath = ["src", "src/doorstop_spec_driven", "tests"]
 addopts = "-v --tb=short"
 
 [dependency-groups]
@@ -19,3 +22,17 @@ dev = [
 [tool.pyright]
 venv = ".venv"
 venvPath = "."
+
+[tool.uv]
+default-groups = []
+
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["doorstop_spec_driven*"]

@@ -28,9 +28,8 @@ def register(mcp: FastMCP):
             os.chdir(project_dir)
             tree = get_tree(project_dir)
 
-            from reporting.validate_and_report import main as _validate_main
-            from core.validator import validate_tree, compute_coverage
-            from core._common import is_normative, get_groups
+            from ..core.validator import validate_tree, compute_coverage
+            from ..core._common import is_normative, get_groups
 
             issues = validate_tree(tree, strict=strict, project_dir=project_dir)
             coverage = compute_coverage(tree)
