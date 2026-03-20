@@ -1,0 +1,50 @@
+active: true
+derived: false
+groups:
+- GLOSSARY
+header: |
+  用語辞書テスト
+level: 1.5
+links:
+- SPEC011: 40VwDYnSROnVzgBsE0Jl4073Dym1mleZBdc5dGFMTPM=
+normative: true
+references:
+- path: tests/test_glossary.py
+  type: file
+reviewed: null
+test_level: unit
+text: |
+  ## 目的
+
+  glossary の CRUD 操作と使用状況チェック・未使用用語検出が
+  正しく動作することを検証する。
+
+  ## 検証観点
+
+  ### 内部関数
+
+  - **_glossary_path**: specification/ ディレクトリの有無による保存場所の分岐
+  - **_load_glossary**: ファイル未存在時の空辞書返却
+  - **_save_glossary**: YAML ファイルへの保存と再読み込みの一致
+  - **_find_term**: 大文字小文字を区別しない検索
+
+  ### CRUD コマンド
+
+  - **cmd_add**: 用語追加。definition, aliases, context, code の各フィールド。
+    重複追加時のエラー
+  - **cmd_update**: 既存用語の部分更新。存在しない用語へのエラー
+  - **cmd_remove**: 用語削除。存在しない用語へのエラー
+  - **cmd_list**: 全用語のソート済み一覧。context フィルタ
+
+  ### 使用状況分析
+
+  - **cmd_check**: IMPL/TST がスキャン対象外であること。
+    エイリアス使用の検出と正式名称の提示
+  - **cmd_unused**: 定義済みだが本文に未出現の用語の検出。
+    エイリアスも含めた存在確認
+
+  ## 主要シナリオ
+
+  - add → list → update → remove のライフサイクル確認
+  - tmp_path を使った一時ディレクトリでのファイル I/O テスト
+  - 空の用語辞書での check / unused の振る舞い

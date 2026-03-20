@@ -1,0 +1,42 @@
+active: true
+derived: false
+groups:
+- CRUD
+header: |
+  CRUD 実装 (crud.py)
+level: 1.0
+links:
+- SPEC001: auOSWOonZgh02R9Wp-sTJWWT-bGAuX62s7J1SVkLt_0=
+- SPEC002: 9oHZazYvMZj24sZcZVK7oUNJRjm2yIgL6TfDenAj1Zs=
+normative: true
+references:
+- path: scripts/core/_doorstop_ops/crud.py
+  type: file
+reviewed: null
+text: |
+  ## 実装概要
+
+  アイテムの add, update, reorder, link, unlink コマンドを実装する。
+  全関数は `cmd_*(tree, args)` パターンに従い、`_util.py` の `_find_item` ヘルパーで
+  共通のエラーハンドリング（UID 不存在時の out() + exit()）を行う。
+
+  ## 設計判断
+
+  ### リンク作成後の stamp 初期化
+
+  `cmd_add` でリンク付きアイテムを追加する際、`item.link()` 後に
+  `item.clear(link_uids)` を実行して stamp を初期化する。
+  これにより、作成直後のアイテムが suspect 状態にならない。
+
+  ### 部分更新パターン
+
+  `cmd_update` では値が None の属性をスキップする。
+  呼び出し元（MCP ツール）が変更したい属性のみを指定すれば、
+  他の属性は保持される。
+
+  ## 実装メモ
+
+  - references は Doorstop 内部では JSON 文字列として格納される。
+    読み出し時はパースが必要
+  - group フィールドは常にリスト型として設定する
+  - `set_normative` / `set_non_normative` は排他的なフラグとして処理する

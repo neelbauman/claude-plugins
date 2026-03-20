@@ -1,0 +1,35 @@
+active: true
+derived: false
+groups:
+- IMPACT
+header: |
+  変更影響分析
+level: 1.6
+links: []
+normative: true
+priority: high
+reviewed: null
+text: |
+  ## 概要
+
+  仕様変更の影響範囲を分析し、影響を受けるアイテムを特定できること。
+  3つの検出方式をサポートする。
+
+  ## 背景・動機
+
+  SDD では仕様変更が上流から下流へ波及する。REQ の変更は
+  ARCH → SPEC → IMPL → TST に影響し、各層で整合性の確認が必要になる。
+  変更影響分析により、修正が必要なアイテムを漏れなく特定し、
+  レビュー範囲を明確にする。
+
+  ## 受入基準
+
+  - 手動指定（--changed UID）で影響分析できる
+  - suspect リンクから自動検出（--detect-suspects）できる
+  - Git diff から自動検出（--from-git）できる
+  - 影響範囲をコンソール、JSON、HTML で出力できる
+
+  ## 制約事項
+
+  - Git 検出方式は Git リポジトリ内でのみ動作する
+  - 影響チェーンの深さは build_link_index の探索深度に依存する

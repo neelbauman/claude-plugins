@@ -1,0 +1,81 @@
+active: true
+derived: false
+gherkin: |
+  Scenario: UID によるチェーン照会
+    Given REQ001 → SPEC001 → IMPL001 のチェーンが存在する
+    When chain --uid SPEC001 を実行する
+    Then 上流に REQ001、下流に IMPL001 が表示される
+
+  Scenario: ファイル逆引き
+    Given IMPL001 が references に "src/module.py" を持つ
+    When chain --file src/module.py を実行する
+    Then IMPL001 とその上流チェーン全体が表示される
+
+  Scenario: ファイル逆引き（サフィックス一致）
+    Given IMPL001 が references に "src/core/module.py" を持つ
+    When chain --file module.py を実行する
+    Then IMPL001 がサフィックス一致で検出される
+
+  Scenario: コンテキスト取得
+    Given SPEC001 にリンクされた上流・下流アイテムが存在する
+    When context SPEC001 を実行する
+    Then target, upstream, downstream, related_files, health が返される
+groups:
+- QUERY
+header: |
+  照会 — chain / context / related-files
+level: 1.5
+links:
+- ARCH002: iIBAqEjUeITsv4opOr_iW8MB6j8pi3JCmLm12ziD86o=
+normative: true
+reviewed: null
+text: |
+  ## インターフェース
+
+  ```python
+  cmd_chain(tree, args)          # args: uid | file
+  cmd_context(tree, args)        # args: uid
+  cmd_related_files(tree, args)  # args: uid
+  ```
+
+  ## 振る舞い
+
+  ### cmd_chain
+
+  2つのモードで動作する:
+
+  **モード A（--uid）**: 指定 UID の上流・下流チェーンを辿り、
+  ドキュメント層別に集約して返す。
+
+  **モード B（--file）**: ファイルパスから references を逆引きする。
+  マッチ戦略は3段階:
+  1. 完全一致
+  2. サフィックス一致（パスの末尾が一致）
+  3. 相対パス表記ゆれ対応
+
+  複数マッチ時は各々のチェーンを返す。
+
+  ### cmd_context
+
+  チェーン上の全アイテム詳細を統合して返す:
+
+  | フィールド | 内容 |
+  |---|---|
+  | `target` | 対象アイテムの詳細（gherkin 含む） |
+  | `upstream` | 上流アイテムの詳細（深さ制限10） |
+  | `downstream` | 下流アイテムの詳細 |
+  | `related_files.source` | IMPL/SPEC の references（ソースコード） |
+  | `related_files.test` | TST の references（テストコード） |
+  | `related_files.upstream` | 上流アイテムの references |
+  | `health.suspects` | suspect 状態のアイテム UID |
+  | `health.unreviewed` | 未レビューアイテム UID |
+  | `health.missing_children` | 子ドキュメント存在なのにリンク無し |
+
+  ### cmd_related_files
+
+  context より軽量。ドキュメント層別にファイルパスリストを返す。
+
+  ## エラーハンドリング
+
+  - UID が存在しない → エラー
+  - --file で該当なし → 空結果

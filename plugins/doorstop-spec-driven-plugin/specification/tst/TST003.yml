@@ -1,0 +1,54 @@
+active: true
+derived: false
+groups:
+- VALIDATE
+header: |
+  バリデーションテスト
+level: 1.2
+links:
+- SPEC008: w2ScuCVJQpvi0pTd3v6VeQ2jvFr5V9rxyn6Q804IU5E=
+normative: true
+references:
+- path: tests/test_validator.py
+  type: file
+reviewed: null
+test_level: unit
+text: |
+  ## 目的
+
+  validator のツリー検証（validate_tree）、トレーサビリティマトリクス構築
+  （build_traceability_matrix）、カバレッジ計算（compute_coverage）が
+  正しく動作することを検証する。
+
+  ## 検証観点
+
+  ### validate_tree
+
+  - 空テキストの warning 検出
+  - inactive / non-normative アイテムのスキップ
+  - 親ドキュメント不存在の error 検出
+  - 親リンク欠落の warning 検出
+  - リンク先不存在の error 検出
+  - クロスグループリンクの warning 検出
+  - strict モードでの逆方向チェック（子からリンクされていない親の warning）
+  - derived チェック: IMPL/TST での derived=true は error、REQ は warning
+  - 未レビューアイテムの info 出力
+
+  ### build_traceability_matrix
+
+  - ルートドキュメントからの行生成
+  - 子ドキュメントの列展開
+  - 1つの親に複数の子がリンクする場合の行複製
+
+  ### compute_coverage
+
+  - ドキュメントペアごとのカバレッジ百分率
+  - グループ別の内訳（total, covered, uncovered）
+  - uncovered_items のリスト出力
+  - 親アイテム0件の場合の除算安全性
+
+  ## 主要シナリオ
+
+  - simple_tree での正常系カバレッジ 100% 確認
+  - リンク欠損ツリーでのカバレッジ < 100% 確認
+  - strict モード有無での検出差異

@@ -1,0 +1,45 @@
+active: true
+derived: false
+groups:
+- GLOSSARY
+header: |
+  用語辞書管理
+level: '1.10'
+links:
+- ARCH001: 6V58o4EBEy-3KpYNjAHFp2NTAFlWb5nYpmX5DCX2iE4=
+normative: true
+reviewed: null
+text: |
+  ## インターフェース
+
+  ```python
+  cmd_add(args)      # args: term, definition, aliases(csv), context, code
+  cmd_update(args)   # args: term, definition, aliases, context, code
+  cmd_remove(args)   # args: term
+  cmd_list(args)     # args: context(optional filter)
+  cmd_check(args)    # args: project_dir
+  cmd_unused(args)   # args: project_dir
+  ```
+
+  ## 振る舞い
+
+  ### データ構造
+
+  保存先: `<spec-dir>/glossary.yml`
+  形式: YAML（`term → {definition, aliases, context, code}`）
+
+  ### cmd_check — エイリアス表記ゆれ検出
+
+  1. スキャン対象: REQ, SPEC, ARCH, HLD, LLD, ADR, NFR のテキスト（IMPL/TST は除外）
+  2. 各用語のエイリアスを正規表現にコンパイルする
+  3. 仕様テキストを走査し、エイリアスが使用されている箇所を検出する
+  4. 「正式名称の代わりにエイリアスが使われている」として警告する
+
+  ### cmd_unused — 未使用用語検出
+
+  定義済み用語で、どの仕様テキストにも出現しないものを検出する。
+
+  ## エラーハンドリング
+
+  - 既存用語への重複追加 → エラー
+  - 存在しない用語の更新・削除 → エラー

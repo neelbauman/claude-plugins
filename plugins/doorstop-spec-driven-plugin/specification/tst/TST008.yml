@@ -1,0 +1,50 @@
+active: true
+derived: false
+groups:
+- CRUD
+header: |
+  ライフサイクルテスト
+level: 1.7
+links:
+- SPEC003: Mo8TMeM6HMt7M35WIBlH0f6aL8MroyCiOD8gZt9LF0Q=
+- SPEC004: 6E_oth_2uxTslcswrinwMEjurjAgye36N1FphrhqZNw=
+normative: true
+references:
+- path: tests/test_doorstop_ops/test_lifecycle.py
+  type: file
+- path: tests/test_doorstop_ops/test_review.py
+  type: file
+reviewed: null
+test_level: unit
+text: |
+  ## 目的
+
+  activate / deactivate のライフサイクル操作、およびレビュー・suspect 解消の
+  チェーン操作が正しく動作することを検証する。
+
+  ## 検証観点
+
+  ### ライフサイクル（test_lifecycle.py）
+
+  - activate: 非アクティブアイテムをアクティブにする
+  - deactivate: アクティブアイテムを非アクティブにする
+  - activate-chain: 非アクティブアイテムとその下流を一括アクティブにする
+  - deactivate-chain: アイテムとその下流を一括非アクティブにする。
+    多親チェックの動作（他のアクティブな親が存在する場合はスキップ）
+  - `--force` フラグでの多親チェックバイパス
+  - 既に目的の状態にあるアイテムのスキップ
+
+  ### レビュー・suspect 解消（test_review.py）
+
+  - **cmd_clear**: suspect リンクの解消。stamp 一致時は何もしない
+  - **cmd_review**: 単一 / 複数アイテムのレビュー済み設定
+  - **cmd_chain_review**: 上流（parents 方向）の一括レビュー。
+    リンクなしアイテムは自身のみ
+  - **cmd_chain_clear**: 下流（children 方向）の一括 suspect 解消。
+    suspect なしの場合は cleared が空
+
+  ## 主要シナリオ
+
+  - simple_tree での正常系チェーン操作
+  - suspect_tree での suspect 検出 → clear の動作確認
+  - ルートアイテム（リンクなし）でのチェーン操作の境界値テスト

@@ -1,0 +1,40 @@
+active: true
+derived: false
+groups:
+- CRUD
+header: |
+  ライフサイクル実装 (lifecycle.py)
+level: 1.1
+links:
+- SPEC003: Mo8TMeM6HMt7M35WIBlH0f6aL8MroyCiOD8gZt9LF0Q=
+normative: true
+references:
+- path: scripts/core/_doorstop_ops/lifecycle.py
+  type: file
+reviewed: null
+text: |
+  ## 実装概要
+
+  activate, deactivate およびチェーン操作を実装する。
+  チェーン非活性化は `build_link_index()` で子孫マップを構築し、
+  `_collect_downstream()` で再帰的に下流アイテムを収集する。
+
+  ## 設計判断
+
+  ### 深さ制限（max_depth=10）
+
+  `_collect_downstream` に max_depth=10 の制限を設けた。
+  SDD ドキュメント階層は通常 REQ→ARCH→SPEC→IMPL/TST の 4-5 層であり、
+  10 は十分なマージン。主目的は循環リンク時の無限ループ防止。
+
+  ### 多親チェックの実装
+
+  `_has_other_active_parents()` は、対象アイテムの全親リンクを走査し、
+  非活性化対象以外にアクティブな親が存在するかを判定する。
+  非活性化済みの親は除外して再チェックする（多親対応）。
+
+  ## 実装メモ
+
+  - `--force` フラグは多親チェックをバイパスする
+  - 活性化チェーンでは親の状態チェックを行わない（活性化は自由に許可）
+  - 既に目的の状態にあるアイテムはスキップし、結果に含めない

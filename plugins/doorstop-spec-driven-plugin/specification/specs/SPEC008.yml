@@ -1,0 +1,74 @@
+active: true
+derived: false
+gherkin: |
+  Scenario: strict モードでの警告
+    Given クロスグループリンクが存在する
+    When validate --strict を実行する
+    Then 警告がエラーとして報告される
+    And 終了コードが非ゼロになる
+
+  Scenario: derived 矛盾の検出
+    Given IMPL アイテムに derived: true が設定されている
+    When validate を実行する
+    Then エラーとして報告される
+
+  Scenario: references ファイル存在チェック
+    Given TST アイテムの references に存在しないファイルパスがある
+    When validate を実行する
+    Then 警告として報告される
+groups:
+- VALIDATE
+header: |
+  バリデーション・カバレッジ計算
+level: 1.7
+links:
+- ARCH001: 6V58o4EBEy-3KpYNjAHFp2NTAFlWb5nYpmX5DCX2iE4=
+normative: true
+reviewed: null
+text: |
+  ## インターフェース
+
+  ```python
+  validate_tree(tree, strict=False, project_dir=".")  # → dict
+  compute_coverage(tree)                               # → dict
+  build_traceability_matrix(tree)                      # → (matrix, prefixes)
+  ```
+
+  ## 振る舞い
+
+  ### validate_tree
+
+  全アイテムに対して以下の検証を実行する:
+
+  | # | 検証項目 | 区分 |
+  |---|---|---|
+  | 1 | テキスト空白チェック | 警告 |
+  | 2 | リンク先の親ドキュメント存在 | エラー |
+  | 3 | リンク先 UID 存在 | エラー |
+  | 4 | リンク先が正しい親ドキュメント配下か | エラー |
+  | 5 | クロスグループリンク | 警告 |
+  | 6 | 逆方向チェック: 親に子がないアイテム（strict のみ） | 警告 |
+  | 7 | IMPL/TST の references ファイル存在 | 警告 |
+  | 8 | derived 矛盾: IMPL/TST で derived:true | エラー |
+  | 9 | derived 矛盾: REQ で derived:true | 警告 |
+  | 10 | derived 矛盾: ARCH/SPEC で derived:true かつ派生根拠なし | 警告 |
+  | 11 | 未レビューアイテム一覧 | 情報 |
+
+  strict モードでは全警告がエラーに昇格する。
+
+  出力: `{"errors": [...], "warnings": [...], "info": [...]}`
+
+  ### compute_coverage
+
+  子→親ドキュメントペアごとに算出:
+  `covered_count / total × 100`
+  `by_group` でグループ別内訳を含む。
+
+  ### build_traceability_matrix
+
+  REQ を根として下流ドキュメント別に行を展開する。
+  1つの REQ に複数 SPEC がリンクされている場合、行を複製する。
+
+  ## エラーハンドリング
+
+  - ツリー構築失敗 → エラーメッセージと共に空の結果を返す

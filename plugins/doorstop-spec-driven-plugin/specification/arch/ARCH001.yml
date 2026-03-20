@@ -1,0 +1,108 @@
+active: true
+derived: false
+groups:
+- ARCH
+header: |
+  全体アーキテクチャ
+level: 1.0
+links:
+- REQ001: zx0I1nbWb_HeUw_JU1cO5_MbVXew8_OVr3I1tNY0dew=
+- REQ002: o70n-TOk8u1y_LkVrm8-0MbGHE9jd2Q3qZ3VNRZ97dc=
+- REQ003: LOPhun0s1GTEak_2yXymAaMJq_2a4veVxoqfeqU-kLk=
+- REQ004: wzD9ZaIyREkPrdlhLvtAIq865k287y8z6PEe2SP6SLU=
+- REQ005: nuZAD8-PEwqxIyfoJC58VirIexzhP5Khaw5yEvjpveg=
+- REQ006: BsrRbBv_eKlas2OfqMkQhdBQI_Mt09fYMf1Fp9xWw8Y=
+- REQ007: 3-hNv45dgPrnfrpO3sqBnqjDKNHey7v8jeWqsdVqkxM=
+- REQ008: baQK5nuWUvkIb5WzrS5chIX9gFYOW6wFsn4zR-zhk3E=
+- REQ009: 1wZOBjPKznDojo6KGfyCNQ66FYGxcdzuif_ir2_jyQY=
+- REQ010: txbVTnBRi8-FpJQatoCJhy_yxJwf2rWY7IN0dLNOlIE=
+- REQ011: kE3iThloGUzDrdLjmF0N5Or2AE05oICztSi6y_VZrzY=
+- REQ012: qF8J5U7vUB9kUChkvA21ZzaHqA-xAulln9vPp0fEmUk=
+normative: true
+reviewed: null
+text: |
+  ## コンポーネント構成
+
+  ```mermaid
+  graph TD
+    MCP[MCP Server Layer<br/>serve_mcp.py] -->|@mcp.tool| ADAPT[Adapter<br/>_adapter.py]
+    ADAPT -->|call_cmd / call_cmd_write| CORE[Core Layer]
+    CORE --> DOPS[doorstop_ops<br/>CRUD・ライフサイクル・レビュー]
+    CORE --> TQ[trace_query<br/>照会・品質メトリクス]
+    CORE --> VAL[validator.py<br/>バリデーション]
+    CORE --> BL[baseline_manager.py<br/>ベースライン]
+    CORE --> IA[impact_analysis.py<br/>影響分析]
+    CORE --> GL[glossary.py<br/>用語辞書]
+    CORE --> COMMON[_common.py<br/>共通ユーティリティ]
+    DOPS --> DS[Doorstop API]
+    TQ --> DS
+    VAL --> DS
+    DS --> YAML[YAML Files<br/>.doorstop.yml + items]
+    INIT[init_project.py] --> DS
+    REPORT[reporting/<br/>HTML レポート] --> CORE
+  ```
+
+  ## コンポーネント責務
+
+  | コンポーネント | 責務 | 主要インターフェース |
+  |---|---|---|
+  | mcp_server/ | MCP ツール登録・リクエスト受付 | @mcp.tool() デコレータ |
+  | _adapter.py | CLI 出力→MCP dict 変換、ツリーキャッシュ | call_cmd(), call_cmd_write() |
+  | _doorstop_ops/ | アイテム CRUD・ライフサイクル・レビュー | cmd_add(), cmd_update(), cmd_link() 等 |
+  | _trace_query/ | チェーン照会・品質メトリクス・検索 | cmd_chain(), cmd_status(), cmd_search() 等 |
+  | validator.py | ツリー構造検証・カバレッジ計算 | validate_tree(), compute_coverage() |
+  | baseline_manager.py | スナップショット作成・差分比較 | cmd_create(), cmd_diff() |
+  | impact_analysis.py | 変更影響分析（手動/suspect/Git） | analyze_impact(), format_impact() |
+  | glossary.py | ドメイン用語 CRUD・使用チェック | cmd_add(), cmd_check(), cmd_unused() |
+  | _common.py | ツリー読込・アイテム変換・出力 | build_tree(), out(), build_link_index() |
+  | init_project.py | プロファイルベースのプロジェクト初期化 | init_project() |
+  | reporting/ | HTML レポート・ダッシュボード | Flask アプリケーション |
+
+  ## データフロー
+
+  ```mermaid
+  sequenceDiagram
+    participant Agent as Claude Code
+    participant MCP as MCP Server
+    participant Adapt as _adapter.py
+    participant Core as Core Module
+    participant DS as Doorstop API
+    participant FS as YAML Files
+
+    Agent->>MCP: tool call (project_dir, params)
+    MCP->>Adapt: call_cmd(cmd_func, project_dir, args)
+    Adapt->>Adapt: get_tree(project_dir) [キャッシュ]
+    Adapt->>Core: cmd_func(tree, args)
+    Core->>DS: item.set() / doc.add_item() / etc.
+    DS->>FS: YAML 読み書き
+    Core->>Core: out(result_dict)
+    Core-->>Adapt: stdout JSON + SystemExit
+    Adapt-->>MCP: parsed dict
+    MCP-->>Agent: {"ok": true, ...}
+  ```
+
+  ## 設計根拠
+
+  ### 駆動要因
+
+  - **Claude Code 統合**: MCP プロトコルが AI エージェントのツールアクセス標準
+    → MCP サーバー層を最上位に配置
+  - **CLI 互換性**: コア機能は MCP なしでもテスト・デバッグ可能であるべき
+    → コア層は CLI スクリプトとして独立動作
+  - **Doorstop 依存の分離**: Doorstop API の変更がアプリケーション全体に波及しない
+    → _common.py で Doorstop API をラップ
+
+  ### なぜ3層分離か
+
+  MCP サーバー層・コア層・Doorstop API 層の3層に分離した。
+
+  - **MCP 層の交換可能性**: トランスポートの変更（stdio → HTTP 等）がコアロジックに影響しない
+  - **コア層の独立テスト**: MCP サーバーを起動せずにユニットテストが可能
+  - **Doorstop API の隔離**: _common.py のラッパーにより、Doorstop API の内部変更を吸収
+
+  ### 検討した代替構成
+
+  - **MCP ツールから直接 Doorstop API を呼ぶ構成**: シンプルだが、
+    テスト時にMCPサーバーの起動が必要になり、コアロジックの再利用も困難なため棄却
+  - **REST API（FastAPI 等）を中間層にする構成**: MCP 以外のクライアント対応が可能だが、
+    MCP が AI エージェントの標準であり、追加の抽象化層はオーバーヘッドのため棄却

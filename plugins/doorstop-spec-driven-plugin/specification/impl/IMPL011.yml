@@ -1,0 +1,86 @@
+active: true
+derived: false
+groups:
+- MCP
+header: |
+  MCP サーバー実装
+level: '1.10'
+links:
+- SPEC014: dBGZeq3AMv2rUsMkljGxS1Z650xP9un9UgW8lc8ka7k=
+normative: true
+references:
+- path: scripts/mcp_server/_adapter.py
+  type: file
+- path: scripts/mcp_server/serve_mcp.py
+  type: file
+- path: scripts/mcp_server/doorstop_tools.py
+  type: file
+- path: scripts/mcp_server/trace_tools.py
+  type: file
+- path: scripts/mcp_server/validate_tools.py
+  type: file
+- path: scripts/mcp_server/impact_tools.py
+  type: file
+- path: scripts/mcp_server/baseline_tools.py
+  type: file
+- path: scripts/mcp_server/glossary_tools.py
+  type: file
+- path: scripts/mcp_server/init_tools.py
+  type: file
+reviewed: null
+text: |
+  ## 実装概要
+
+  FastMCP stdio サーバーとアダプタ層を実装し、コア機能を MCP ツールとして公開する。
+
+  ### アダプタ層 (_adapter.py)
+
+  - **get_tree()**: `_tree_cache` によるキャッシュ付きツリー取得。
+    `threading.Lock` でスレッドセーフ
+  - **invalidate_cache()**: 書き込み操作後にキャッシュを無効化する
+  - **call_cmd()**: stdout キャプチャ + SystemExit キャッチで cmd_* 関数を呼び出す。
+    `contextlib.redirect_stdout(StringIO)` を使用
+  - **call_cmd_no_tree()**: ツリーを引数に取らない関数用（glossary 等）
+  - **call_cmd_write()**: `call_cmd()` + `invalidate_cache()` の書き込み操作用ラッパー
+
+  ### ツール登録 (doorstop_tools.py 等)
+
+  `@mcp.tool()` デコレータで各ツールを登録する。
+  ツールファイルは機能領域ごとに分割:
+
+  - doorstop_tools.py: CRUD, lifecycle, review 系
+  - trace_tools.py: 照会, チェーン, ステータス 系
+  - validate_tools.py: バリデーション, カバレッジ 系
+  - impact_tools.py: 影響分析 系
+  - baseline_tools.py: ベースライン 系
+  - glossary_tools.py: 用語辞書 系
+  - init_tools.py: 初期化 系
+
+  ## 設計判断
+
+  ### stdout キャプチャ方式
+
+  コア関数は `out()` + `sys.exit(0)` で CLI として動作する設計である。
+  これを MCP 用に書き換えるのではなく、アダプタ層で stdout をキャプチャし
+  SystemExit をキャッチして JSON を parse する方式を採用した。
+  コア関数の修正が不要で、CLI としての動作も維持できる。
+
+  ### ツリーキャッシュ
+
+  `_tree_cache: dict[str, tuple]` で project_dir → (tree, cwd) を管理する。
+  読み取り操作では `doorstop.build()` を再実行せずキャッシュを返し、
+  書き込み操作後は `invalidate_cache()` で整合性を保証する。
+  `threading.Lock` でマルチスレッド環境での安全性を確保。
+
+  ### call_cmd_no_tree の導入
+
+  glossary の cmd_add / cmd_update 等はツリーを引数に取らず、
+  `args.project_dir` を自分で使う設計。
+  これに対応するため call_cmd とは別に call_cmd_no_tree を用意した。
+
+  ## 実装メモ
+
+  - レスポンス形式: 成功 `{"ok": true, ...}`, エラー `{"ok": false, "error": "..."}`
+  - JSON パース失敗時は `{"ok": true, "raw_output": output}` を返す
+  - 出力が空の場合は `{"ok": true, "message": "コマンドが正常に完了しました"}` を返す
+  - cwd は call_cmd 内で project_dir に変更し、finally で元に戻す

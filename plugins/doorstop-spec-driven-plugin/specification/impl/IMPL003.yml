@@ -1,0 +1,44 @@
+active: true
+derived: false
+groups:
+- CRUD
+header: |
+  レビュー実装 (review.py)
+level: 1.2
+links:
+- SPEC004: 6E_oth_2uxTslcswrinwMEjurjAgye36N1FphrhqZNw=
+normative: true
+references:
+- path: scripts/core/_doorstop_ops/review.py
+  type: file
+reviewed: null
+text: |
+  ## 実装概要
+
+  review, clear およびチェーン一括操作を4つのコマンド関数で実装する。
+
+  - **cmd_clear**: 指定UIDのアイテムについて、全リンクの stamp と親の stamp() を比較し、
+    不一致のリンクだけを `item.clear(suspect_links)` で解消する
+  - **cmd_review**: 指定UIDのアイテムを `item.review()` でレビュー済みにする
+  - **cmd_chain_review**: BFS で上流（parents 方向）をたどり、起点＋全祖先を一括レビューする
+  - **cmd_chain_clear**: BFS で下流（children 方向）をたどり、起点＋全子孫の suspect を一括解消する
+
+  ## 設計判断
+
+  ### チェーン走査の方向性
+
+  chain-review は上流（親方向）、chain-clear は下流（子方向）のみをたどる。
+  SDD 原則に基づき、review は「仕様を確定させる」操作なので上流に波及させ、
+  clear は「変更を承認する」操作なので下流に波及させる。
+
+  ### BFS による全走査
+
+  `build_link_index()` で構築した `parents_map` / `children_map` を使い、
+  visited セットで循環を防止しながら BFS で全チェーンを走査する。
+  depth 制限は設けていない（チェーンは通常 4-5 層と浅いため）。
+
+  ## 実装メモ
+
+  - cmd_clear は `item.save()` を明示的に呼ぶが、cmd_review は doorstop 側で自動保存される
+  - chain-review / chain-clear はいずれも `item.save()` を明示的に呼ぶ
+  - suspect 判定は `link.stamp is not None and link.stamp != "" and link.stamp != parent.stamp()` の3条件

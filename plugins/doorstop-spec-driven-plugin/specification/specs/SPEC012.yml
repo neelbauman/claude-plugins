@@ -1,0 +1,40 @@
+active: true
+derived: false
+groups:
+- INIT
+header: |
+  プロジェクト初期化
+level: 1.11
+links:
+- ARCH001: 6V58o4EBEy-3KpYNjAHFp2NTAFlWb5nYpmX5DCX2iE4=
+normative: true
+reviewed: null
+text: |
+  ## インターフェース
+
+  ```python
+  init_project(project_dir, profile, digits=3, separator="",
+               docs_dir="./specification", no_git_init=False, with_nfr=False)
+  ```
+
+  ## 振る舞い
+
+  ### 処理フロー
+
+  1. Git リポジトリ確認（`--no-git-init` でスキップ可能）
+  2. プロファイル YAML 読み込み（`profiles/*.yml`）
+  3. プロファイル定義に従い `doorstop create` でドキュメントを順次作成する
+  4. 各ドキュメントに attributes を設定する（defaults, reviewed, publish）
+  5. `--with-nfr` 指定時は NFR ドキュメントを追加作成する
+  6. 検証を実行し、次ステップを表示する
+
+  ## パラメータ詳細
+
+  | パラメータ | デフォルト | 説明 |
+  |---|---|---|
+  | `profile` | — | `lite` / `standard` / `full` |
+  | `digits` | `3` | UID の数字桁数 |
+  | `separator` | `""` | UID のセパレータ |
+  | `docs_dir` | `./specification` | ドキュメント格納ディレクトリ |
+  | `no_git_init` | `False` | Git 初期化をスキップ |
+  | `with_nfr` | `False` | NFR ドキュメントを追加作成 |

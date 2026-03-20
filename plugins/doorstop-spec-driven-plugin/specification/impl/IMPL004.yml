@@ -1,0 +1,48 @@
+active: true
+derived: false
+groups:
+- QUERY
+header: |
+  照会実装 (query.py, chain.py, status.py, search.py, quality.py)
+level: 1.3
+links:
+- SPEC005: rcBuGPZae6W6OgSTZwnKQ6IIrLqhXt735OI3_s7jcEQ=
+- SPEC006: PtcDLLWyFnT0vez4o2WYCyfSNy1oa0J-_SbrHrAB8J0=
+- SPEC007: mkwjV_aDAj3zcMFTMLKVu3haV3oyPfzDbnhAjuZgHhk=
+normative: true
+references:
+- path: scripts/core/_doorstop_ops/query.py
+  type: file
+- path: scripts/core/_trace_query/chain.py
+  type: file
+reviewed: null
+text: |
+  ## 実装概要
+
+  照会機能を5つのサブモジュールに分割して実装する。
+
+  - **query.py**: list, groups, tree, find の基本照会。シンプルなフィルタリングと出力
+  - **chain.py**: チェーン走査と逆引き。build_link_index による効率的な上流・下流走査
+  - **status.py**: ドキュメント統計の集約とカバレッジ計算
+  - **search.py**: 多軸フィルタリングパイプライン。正規表現コンパイルを含む
+  - **quality.py**: suspect 検出とアクション提示、優先度付きバックログ
+
+  ## 設計判断
+
+  ### ファイル逆引きの3段階マッチング
+
+  chain.py の `--file` オプションでは、完全一致 → サフィックス一致 →
+  相対パス正規化の3段階でマッチングする。
+  ユーザーが `module.py` だけを指定しても、`src/core/module.py` を検出できる。
+
+  ### search のフィルタ順序
+
+  document → group → priority → suspect → unreviewed → derived → pattern の順で
+  フィルタを適用する。コストの低いフィルタを先に実行し、
+  正規表現マッチ（最もコストが高い）を最後にすることで効率を確保する。
+
+  ## 実装メモ
+
+  - quality.py の `_suggest_action` は IMPL/TST/SPEC で異なるアクション文言を生成する
+  - backlog のソート順は priority の重みマップ（critical=5, high=4, ...）で実装
+  - coverage の by_group 内訳は、アイテムの groups 属性から集約する

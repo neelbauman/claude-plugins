@@ -1,0 +1,36 @@
+active: true
+derived: false
+groups:
+- INIT
+header: |
+  初期化テスト
+level: 1.8
+links:
+- SPEC012: iEhvHySf-9HtYXhDCJ1nmdLALB3oWRHQu7IPNWwj1lk=
+normative: true
+references: []
+reviewed: null
+test_level: unit
+text: |
+  ## 目的
+
+  init_project のプロファイル読み込み、ドキュメント作成、attributes 設定が
+  正しく動作することを検証する。
+
+  ## 検証観点
+
+  - **load_profile**: lite / standard / full の3プロファイルが正しく読み込まれる。
+    存在しないプロファイル名でのエラー
+  - **_configure_attributes**: defaults / reviewed / publish セクションの構成。
+    REQ/NFR での priority 追加、ADR での status 追加
+  - **is_git_repo**: Git リポジトリの判定
+  - **ツリー構造**: プロファイルごとに正しい親子関係のドキュメントが作成される
+    - lite: REQ → SPEC → IMPL/TST
+    - standard: REQ → ARCH → SPEC → IMPL/TST
+    - full: REQ → HLD → LLD → IMPL/TST
+
+  ## 主要シナリオ
+
+  - 各プロファイルでの `doorstop create` 呼び出し回数と引数の確認
+  - `.doorstop.yml` の attributes セクションの内容確認
+  - `--with-nfr` フラグでの NFR ドキュメント追加確認

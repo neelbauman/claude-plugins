@@ -1,0 +1,15 @@
+settings:
+  digits: '3'
+  itemformat: yaml
+  prefix: REQ
+  sep: ''
+attributes:
+  defaults:
+    groups: []
+    priority: medium
+  reviewed:
+  - groups
+  - priority
+  publish:
+  - groups
+  - priority

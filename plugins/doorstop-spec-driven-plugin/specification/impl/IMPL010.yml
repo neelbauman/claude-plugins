@@ -1,0 +1,76 @@
+active: true
+derived: false
+groups:
+- COMMON
+header: |
+  共通ユーティリティ実装 (_common.py)
+level: 1.9
+links:
+- SPEC013: GGPJBs7FgB1Fepc_cjTGfQNulprldZkrfgFCYS5zukE=
+normative: true
+references:
+- path: scripts/core/_common.py
+  type: file
+reviewed: null
+text: |
+  ## 実装概要
+
+  全スクリプト群で共有されるヘルパー関数を一元管理する。
+  大きく5カテゴリに分類される。
+
+  ### JSON 出力
+
+  - **out()**: `json.dumps()` + `sys.exit()` パターン。`ok` キーが True なら exit(0)、
+    False なら exit(1)。MCP アダプタがこの出力をキャプチャする
+
+  ### 属性アクセサー
+
+  - **get_groups()**: groups 属性をリスト型で取得。文字列の場合はカンマ分割
+  - **get_ref()** / **get_references()**: references → ref のフォールバックチェーン
+  - **is_derived()** / **is_normative()**: bool 属性のアクセサー。normative のデフォルトは True
+  - **get_priority()**: 6段階の priority 属性。デフォルトは "medium"
+
+  ### ツリーナビゲーション
+
+  - **find_item()**: UID 文字列からアイテムを検索する。`include_inactive=True` で
+    非アクティブアイテムも返す（activate 操作で必要）
+  - **find_doc_prefix()**: アイテムが所属するドキュメントのプレフィックスを返す
+  - **is_suspect()**: リンクの stamp と親アイテムの stamp() を比較して判定する
+
+  ### リンクインデックス
+
+  - **build_link_index()**: ツリー内の全リンクを1パスで走査し、
+    children (parent_uid → child list) と parents (child_uid → parent list) の
+    双方向マップを構築する。チェーン操作の基盤
+
+  ### シリアライゼーション
+
+  - **item_summary()**: 照会用のコンパクト表現。text は200文字でトランケート
+  - **item_to_dict()**: CRUD用の完全表現。gherkin, suspect を含む
+  - **build_doc_file_map()**: ファイルパス → UID のマッピング。Git diff 連携で使用
+
+  ## 設計判断
+
+  ### out() の exit パターン
+
+  CLI ツールとして `out()` + `sys.exit()` で終了する設計を採用した。
+  MCP アダプタが stdout キャプチャ + SystemExit キャッチで dict に変換するため、
+  コア関数の修正なしで CLI / MCP 両方に対応できる。
+
+  ### get_references のフォールバック
+
+  references 属性が存在しない場合は ref 属性から `[{"path": ref, "type": "file"}]` を生成する。
+  後方互換性を維持しつつ、新しい references 形式への移行を促す。
+
+  ### build_link_index の include_inactive
+
+  デフォルトは False（アクティブアイテムのみ）。
+  activate_chain 等で非アクティブアイテムのリンク関係も必要なため、
+  include_inactive=True オプションを提供する。
+
+  ## 実装メモ
+
+  - truncate_text は超過時に "...[TRUNCATED]" を付加する
+  - find_item は doc.find_item() の例外を catch して None を返す設計
+  - priority の有効値: critical, high, medium, low, none, done
+  - get_references_display は type が "file" 以外の場合に種別を付記する

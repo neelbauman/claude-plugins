@@ -1,0 +1,35 @@
+active: true
+derived: false
+groups:
+- INIT
+header: |
+  プロジェクト初期化
+level: 1.8
+links: []
+normative: true
+priority: high
+reviewed: null
+text: |
+  ## 概要
+
+  プロファイル（lite/standard/full）に基づいて Doorstop ドキュメントツリーを
+  自動生成し、attributes を設定できること。
+
+  ## 背景・動機
+
+  SDD の導入障壁を下げるため、プロファイル選択だけで適切なドキュメント階層を
+  自動構築する。lite（小規模）、standard（チーム開発）、full（V字モデル）の
+  3プロファイルにより、プロジェクト規模に応じた最適な構成を提供する。
+
+  ## 受入基準
+
+  - lite / standard / full プロファイルを選択できる
+  - プロファイル定義に従ったドキュメント階層が自動作成される
+  - 各ドキュメントに defaults / reviewed / publish の attributes が設定される
+  - NFR ドキュメントをオプションで作成できる
+  - Git 初期化のスキップオプションがある
+
+  ## 制約事項
+
+  - プロファイル定義は profiles/*.yml に格納し、宣言的に記述する
+  - Doorstop の tree 構造制約（単一ルート、循環禁止）に従う

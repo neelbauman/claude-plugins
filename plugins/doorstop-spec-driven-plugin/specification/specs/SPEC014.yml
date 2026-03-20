@@ -1,0 +1,63 @@
+active: true
+derived: false
+groups:
+- MCP
+header: |
+  MCP アダプタ・ツール定義
+level: 1.13
+links:
+- ARCH003: Ml3nihObkAmtUDfodqSL2E9PDVwMjiMMGAEnqA3P-5o=
+normative: true
+reviewed: null
+text: |
+  ## インターフェース
+
+  ### _adapter.py
+
+  ```python
+  get_tree(project_dir: str) -> Tree            # キャッシュ付きツリー取得
+  invalidate_cache(project_dir: str) -> None     # キャッシュ無効化
+  call_cmd(cmd_func, project_dir, args_dict) -> dict      # 読み取り操作用
+  call_cmd_write(cmd_func, project_dir, args_dict) -> dict # 書き込み操作用
+  ```
+
+  ### ツール登録パターン
+
+  ```python
+  @mcp.tool()
+  def sdd_xxx(project_dir: str, param1: str, ...) -> dict:
+      return call_cmd(cmd_xxx, project_dir, {"param1": param1, ...})
+  ```
+
+  ## 振る舞い
+
+  ### call_cmd（読み取り操作）
+
+  1. `get_tree(project_dir)` でキャッシュ付きツリーを取得する
+  2. stdout を StringIO にリダイレクトする
+  3. `cmd_func(tree, Namespace(**args))` を実行する
+  4. SystemExit をキャッチし、stdout の JSON を parse して dict で返す
+
+  ### call_cmd_write（書き込み操作）
+
+  1. `call_cmd` と同じ処理を実行する
+  2. 実行後に `invalidate_cache(project_dir)` でキャッシュを無効化する
+
+  ### ツリーキャッシュ
+
+  `_tree_cache: dict[str, tuple[tree, cwd]]` で管理。
+  読み取り操作では doorstop.build() を再実行せずキャッシュを返す。
+  書き込み操作後はキャッシュを無効化して整合性を保証する。
+
+  ### レスポンス形式
+
+  - 成功時: `{"ok": true, "action": "...", ...}` — コア関数の出力をそのまま返す
+  - エラー時: `{"ok": false, "error": "message"}` — SystemExit の出力から抽出
+
+  ## 設計判断
+
+  ### stdout キャプチャ方式
+
+  コア関数は `out()` + `sys.exit(0)` で CLI として動作する設計である。
+  これを MCP 用に書き換えるのではなく、アダプタ層で出力をキャプチャする方式を採用した。
+  コア関数の修正が不要で、CLI としての動作も維持できる。

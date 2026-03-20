@@ -1,0 +1,56 @@
+active: true
+derived: false
+groups:
+- INIT
+header: |
+  初期化実装 (init_project.py)
+level: 1.8
+links:
+- SPEC012: iEhvHySf-9HtYXhDCJ1nmdLALB3oWRHQu7IPNWwj1lk=
+normative: true
+references:
+- path: scripts/init_project.py
+  type: file
+reviewed: null
+text: |
+  ## 実装概要
+
+  プロファイル YAML に基づいて Doorstop ドキュメントツリーを初期化する。
+
+  - **load_profile()**: `profiles/` ディレクトリから YAML を読み込む。
+    lite / standard / full の3プロファイルをサポート
+  - **main()**: Git リポジトリ確認 → プロファイル読み込み → `doorstop create` 呼び出し
+    → attributes 設定の順で処理する
+  - **_configure_attributes()**: `.doorstop.yml` に defaults / reviewed / publish
+    セクションを追加する
+
+  ## 設計判断
+
+  ### プロファイルベースのツリー生成
+
+  ドキュメント階層をプロファイル YAML で定義し、`doorstop create` コマンドの
+  subprocess 呼び出しで各ドキュメントを作成する。
+  プロファイルの `tree` 配列に prefix, path, parent, role を持たせ、
+  順序通りに作成することで親子関係を正しく構築する。
+
+  ### attributes の自動設定
+
+  `_configure_attributes()` は `doorstop create` で生成された `.doorstop.yml` を読み込み、
+  以下の attributes セクションを追加する:
+
+  - 全ドキュメント: `defaults.groups = []`, `reviewed = ["groups"]`, `publish = ["groups"]`
+  - REQ/NFR: `priority` を reviewed / publish に追加、`defaults.priority = "medium"`
+  - ADR: `status` を reviewed / publish に追加、`defaults.status = "accepted"`
+
+  ### NFR の独立ドキュメント化
+
+  `--with-nfr` フラグで非機能要件を独立ドキュメントとして作成する。
+  NFR は parent=null（トップレベル）で、設計ドキュメントから NFR へのリンクで
+  制約を明示する運用を想定。
+
+  ## 実装メモ
+
+  - Git リポジトリが未初期化の場合は `git init` + 空コミットを実行する
+  - `--no-git-init` フラグで Git 初期化をスキップ可能
+  - `--digits` でUID桁数、`--separator` で区切り文字を指定可能
+  - `_print_tree()` はプロファイルのツリー構造を視覚的に表示する

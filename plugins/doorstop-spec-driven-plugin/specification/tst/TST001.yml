@@ -1,0 +1,54 @@
+active: true
+derived: false
+groups:
+- CRUD
+header: |
+  CRUD テスト
+level: 1.0
+links:
+- SPEC001: auOSWOonZgh02R9Wp-sTJWWT-bGAuX62s7J1SVkLt_0=
+- SPEC002: 9oHZazYvMZj24sZcZVK7oUNJRjm2yIgL6TfDenAj1Zs=
+normative: true
+references:
+- path: tests/test_doorstop_ops/test_crud.py
+  type: file
+reviewed: null
+test_level: unit
+text: |
+  ## 目的
+
+  doorstop_ops の CRUD 操作（add, update, reorder, link, unlink）が
+  正しく動作することを検証する。
+
+  ## 検証観点
+
+  ### cmd_add
+
+  - 基本的なアイテム追加が `{"ok": true, "action": "add"}` を返す
+  - header, group, ref, references, priority, test_level の各オプションが反映される
+  - non_normative, derived フラグが正しく設定される
+  - gherkin, links の指定が反映される
+  - level, insert による位置指定が機能する
+
+  ### cmd_update
+
+  - text, header, group, priority の更新が反映される
+  - set_normative / set_non_normative が排他的に動作する
+  - gherkin の更新が反映される
+  - 全フィールド None の場合は元の値が維持される（部分更新パターン）
+
+  ### cmd_reorder
+
+  - level の変更が old_level / new_level として返される
+
+  ### cmd_link / cmd_unlink
+
+  - リンク追加後に item.links に親UIDが含まれる
+  - リンク削除後に removed_parent が返される
+  - 存在しないリンクの削除は `{"ok": false}` を返す
+
+  ## 主要シナリオ
+
+  - 全属性指定での add → 各属性の反映確認
+  - 部分更新パターン: None フィールドがスキップされることの確認
+  - references の JSON 文字列パース

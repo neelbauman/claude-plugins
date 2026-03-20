@@ -1,0 +1,97 @@
+active: true
+derived: false
+gherkin: |
+  Scenario: アイテム追加
+    Given Doorstop ツリーが存在する
+    When add コマンドを text, header, group, priority 付きで実行する
+    Then 新しいアイテムが指定ドキュメントに作成される
+    And 指定された属性がすべて設定される
+
+  Scenario: アイテム更新（部分更新）
+    Given 既存アイテム REQ001 が存在する
+    When update コマンドで priority のみを high に変更する
+    Then REQ001 の priority が high に更新される
+    And 他の属性は変更されない
+
+  Scenario: リンク付きアイテム追加
+    Given REQ001 が存在する
+    When add コマンドを links=REQ001 付きで実行する
+    Then 新しいアイテムが作成される
+    And REQ001 へのリンクが追加される
+    And リンクの stamp が初期化される（suspect にならない）
+
+  Scenario: アイテム並べ替え
+    Given REQ001 が level 1.0 である
+    When reorder コマンドで level を 2.0 に変更する
+    Then REQ001 の level が 2.0 に変更される
+groups:
+- CRUD
+header: |
+  CRUD 操作 — add / update / reorder
+level: 1.0
+links:
+- ARCH002: iIBAqEjUeITsv4opOr_iW8MB6j8pi3JCmLm12ziD86o=
+normative: true
+reviewed: null
+text: |
+  ## インターフェース
+
+  ```python
+  cmd_add(tree, args)
+  # args: document, text, header, group, level, insert,
+  #       references(JSON), priority, test_level,
+  #       non_normative, derived, gherkin, links(UID list)
+
+  cmd_update(tree, args)
+  # args: uid, text, header, group, priority, test_level,
+  #       gherkin, references, set_normative, set_non_normative
+
+  cmd_reorder(tree, args)
+  # args: uid, level
+  ```
+
+  ## 振る舞い
+
+  ### cmd_add
+
+  1. 指定ドキュメントから doc を取得する
+  2. `doc.add_item()` で新規アイテムを作成する
+  3. text, header, group（リスト型）, priority 等の属性を設定する
+  4. references は JSON 文字列をパースして設定する
+  5. links が指定された場合、各 UID に対して `item.link()` を実行する
+  6. リンク追加後に `item.clear(link_uids)` で stamp を初期化する（suspect 防止）
+  7. `item.save()` で永続化する
+
+  ### cmd_update
+
+  1. UID でアイテムを検索する
+  2. 値が None でない属性のみ上書きする（部分更新）
+  3. `set_normative` / `set_non_normative` フラグで normative 属性を切り替える
+  4. `item.save()` で永続化する
+
+  ### cmd_reorder
+
+  1. UID でアイテムを検索する
+  2. `item.level` を新しい値に設定する
+  3. `doc.reorder(automatic=True, keep=item)` で自動再配置する
+
+  ## パラメータ詳細
+
+  | パラメータ | 対象 | 説明 |
+  |---|---|---|
+  | `document` | add | 対象ドキュメント（REQ, SPEC 等） |
+  | `text` | add/update | アイテム本文（Markdown） |
+  | `header` | add/update | 短い見出し |
+  | `group` | add/update | グループ名（リスト型） |
+  | `priority` | add/update | `critical` / `high` / `medium` / `low` / `none` / `done` |
+  | `references` | add/update | JSON 文字列 `[{"path":"...","type":"file"}]` |
+  | `gherkin` | add/update | BDD シナリオ（Given/When/Then） |
+  | `links` | add | リンク先 UID のリスト |
+  | `non_normative` | add | true で normative=false を設定 |
+  | `derived` | add | true で derived=true を設定 |
+
+  ## エラーハンドリング
+
+  - UID が存在しない → `{"ok": false, "error": "Item not found: UID"}`
+  - priority が不正値 → `{"ok": false, "error": "Invalid priority"}`
+  - ドキュメントが存在しない → `{"ok": false, "error": "Document not found"}`

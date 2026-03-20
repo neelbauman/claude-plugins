@@ -1,0 +1,70 @@
+active: true
+derived: false
+groups:
+- ARCH
+header: |
+  コアモジュール分割方針
+level: 1.1
+links:
+- REQ001: zx0I1nbWb_HeUw_JU1cO5_MbVXew8_OVr3I1tNY0dew=
+- REQ002: o70n-TOk8u1y_LkVrm8-0MbGHE9jd2Q3qZ3VNRZ97dc=
+- REQ003: LOPhun0s1GTEak_2yXymAaMJq_2a4veVxoqfeqU-kLk=
+- REQ004: wzD9ZaIyREkPrdlhLvtAIq865k287y8z6PEe2SP6SLU=
+normative: true
+reviewed: null
+text: |
+  ## コンポーネント構成
+
+  ```mermaid
+  graph TD
+    DOP[doorstop_ops.py<br/>エントリーポイント] --> CRUD[crud.py<br/>add/update/reorder/link/unlink]
+    DOP --> LC[lifecycle.py<br/>activate/deactivate チェーン]
+    DOP --> RV[review.py<br/>review/clear チェーン]
+    DOP --> QR[query.py<br/>list/groups/tree/find]
+    CRUD --> UTIL[_util.py<br/>共通ヘルパー]
+    LC --> UTIL
+    RV --> UTIL
+
+    TQ[trace_query.py<br/>エントリーポイント] --> CH[chain.py<br/>chain/context/related-files]
+    TQ --> ST[status.py<br/>status/coverage/gaps]
+    TQ --> SR[search.py<br/>属性フィルタ検索]
+    TQ --> QL[quality.py<br/>suspects/backlog]
+  ```
+
+  ## コンポーネント責務
+
+  | サブモジュール | 責務 | 公開関数 |
+  |---|---|---|
+  | crud.py | アイテム CRUD・リンク操作 | cmd_add, cmd_update, cmd_reorder, cmd_link, cmd_unlink |
+  | lifecycle.py | 活性化・非活性化（チェーン対応） | cmd_activate, cmd_deactivate, cmd_activate_chain, cmd_deactivate_chain |
+  | review.py | レビュー・suspect クリア（チェーン対応） | cmd_review, cmd_clear, cmd_chain_review, cmd_chain_clear |
+  | query.py | 基本照会 | cmd_list, cmd_groups, cmd_tree, cmd_find |
+  | chain.py | トレーサビリティチェーン照会 | cmd_chain, cmd_context, cmd_related_files |
+  | status.py | 状況・カバレッジ・欠落検出 | cmd_status, cmd_coverage, cmd_gaps |
+  | search.py | 多軸フィルタ検索 | cmd_search |
+  | quality.py | 品質メトリクス | cmd_suspects, cmd_backlog |
+  | _util.py | エラーハンドリングヘルパー | _find_item |
+
+  ## 設計根拠
+
+  ### 駆動要因
+
+  - **ファイルサイズ**: doorstop_ops.py と trace_query.py が各1000行超に肥大化
+    → 機能単位でサブモジュールに分割
+  - **関心の分離**: CRUD・ライフサイクル・レビューは異なるワークフロー
+    → 独立したサブモジュールとして分離
+
+  ### なぜエントリーポイント + サブモジュール方式か
+
+  エントリーポイント（doorstop_ops.py, trace_query.py）は CLI のサブコマンド振り分けのみを担当し、
+  ビジネスロジックはサブモジュールに配置する。
+
+  - **独立テスト**: 各サブモジュールを個別にテスト可能
+  - **CLI 互換**: エントリーポイントで argparse 処理を集約し、サブモジュールは (tree, args) を受け取る
+  - **MCP からの直接呼び出し**: サブモジュールの cmd_* 関数を MCP アダプタから直接呼べる
+
+  ### IF 方針
+
+  各サブモジュールの関数は `cmd_*(tree, args)` パターンで統一する。
+  `tree` は doorstop.build() の結果、`args` は argparse.Namespace または同等の dict。
+  結果は `out()` で JSON 出力する。

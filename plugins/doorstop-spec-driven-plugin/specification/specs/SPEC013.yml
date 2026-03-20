@@ -1,0 +1,55 @@
+active: true
+derived: false
+groups:
+- COMMON
+header: |
+  共通ユーティリティ (_common.py)
+level: 1.12
+links:
+- ARCH001: 6V58o4EBEy-3KpYNjAHFp2NTAFlWb5nYpmX5DCX2iE4=
+normative: true
+reviewed: null
+text: |
+  ## インターフェース
+
+  ```python
+  # 出力
+  out(data: dict) -> None                    # JSON 出力 + sys.exit(0)
+
+  # アイテム検索
+  find_item(tree, uid_str, include_inactive=False) -> Item | None
+
+  # シリアライゼーション
+  item_to_dict(item, doc_prefix=None, tree=None) -> dict   # 完全表現
+  item_summary(item, prefix=None, tree=None) -> dict       # コンパクト表現
+
+  # リンクインデックス
+  build_link_index(tree, include_inactive=False) -> tuple[dict, dict]
+    # → (children_idx, parents_idx)
+
+  # suspect 判定
+  is_suspect(item, tree) -> bool    # link.stamp != parent.stamp()
+
+  # ドキュメント構造
+  build_doc_file_map(tree, project_dir) -> dict  # file_path → uid_str
+
+  # 属性アクセッサー
+  get_groups(item, default=None) -> list
+  get_references(item) -> list[dict]
+  is_derived(item) -> bool
+  is_normative(item, default=True) -> bool
+  get_priority(item, default="medium") -> str
+  truncate_text(text: str, limit: int) -> str
+  ```
+
+  ## 振る舞い
+
+  - **out()**: JSON シリアライズして stdout に出力し、sys.exit(0) で終了する。
+    MCP アダプタが stdout + SystemExit をキャプチャして dict に変換する
+  - **build_link_index()**: ツリー内の全リンクを1パスで走査し、
+    `children_idx[parent_uid] = [(child_item, prefix), ...]` と
+    `parents_idx[child_uid] = [(parent_item, prefix), ...]` の双方向マップを構築する
+  - **is_suspect()**: リンクの stamp 属性と親アイテムの stamp() メソッドの返り値を比較する。
+    不一致なら親が変更されたことを意味し、suspect と判定する
+  - **item_to_dict()**: text, header, links, groups, priority, gherkin, references 等全属性を含む
+  - **item_summary()**: 照会用のコンパクト表現（text は truncate される）

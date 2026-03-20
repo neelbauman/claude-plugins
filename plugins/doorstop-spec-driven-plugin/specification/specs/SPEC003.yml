@@ -1,0 +1,84 @@
+active: true
+derived: false
+gherkin: |
+  Scenario: チェーン非活性化
+    Given REQ001 → SPEC001 → IMPL001 のチェーンが存在する
+    When deactivate-chain REQ001 を実行する
+    Then REQ001, SPEC001, IMPL001 すべてが active=False になる
+
+  Scenario: 複数親を持つアイテムのスキップ
+    Given IMPL001 が SPEC001 と SPEC002 の両方にリンクされている
+    And SPEC002 はアクティブである
+    When deactivate-chain SPEC001 を実行する
+    Then IMPL001 はスキップされる（他のアクティブな親が存在するため）
+
+  Scenario: --force によるチェーン非活性化
+    Given IMPL001 が SPEC001 と SPEC002 の両方にリンクされている
+    When deactivate-chain --force SPEC001 を実行する
+    Then IMPL001 も非活性化される
+
+  Scenario: チェーン活性化
+    Given 非活性な REQ001 → SPEC001 → IMPL001 のチェーンが存在する
+    When activate-chain REQ001 を実行する
+    Then REQ001, SPEC001, IMPL001 すべてが active=True になる
+groups:
+- CRUD
+header: |
+  ライフサイクル — activate / deactivate
+level: 1.2
+links:
+- ARCH002: iIBAqEjUeITsv4opOr_iW8MB6j8pi3JCmLm12ziD86o=
+normative: true
+reviewed: null
+text: |
+  ## インターフェース
+
+  ```python
+  cmd_activate(tree, args)           # args: uid
+  cmd_deactivate(tree, args)         # args: uid
+  cmd_activate_chain(tree, args)     # args: uid
+  cmd_deactivate_chain(tree, args)   # args: uid, force
+  ```
+
+  ## 振る舞い
+
+  ### cmd_activate / cmd_deactivate
+
+  単一アイテムの `active` フラグを変更する。物理削除ではなくソフトデリート。
+
+  ### cmd_deactivate_chain
+
+  1. 起点 UID のアイテムを非活性化する
+  2. `build_link_index()` で子孫マップを構築する
+  3. `_collect_downstream(uid, children_idx, max_depth=10)` で下流アイテムを再帰探索する
+  4. 各アイテムについて:
+     - 既に非活性 → スキップ
+     - `--force` なし AND 他のアクティブな親が存在 → スキップ
+     - それ以外 → 非活性化して結果に記録
+
+  ### cmd_activate_chain
+
+  1. 起点 UID のアイテムを活性化する
+  2. 下流アイテムを連鎖的に活性化する（親の状態チェックなし）
+
+  ## エラーハンドリング
+
+  - UID が存在しない → エラー
+
+  ## 設計判断
+
+  ### 多親対応のスキップロジック
+
+  他のアクティブな親を持つアイテムはデフォルトでスキップする。
+  これにより、共有コンポーネントの意図しない非活性化を防止する。
+  `--force` フラグで強制的に非活性化できる。
+
+  ### 深さ制限（max_depth=10）
+
+  SDD ドキュメント階層は通常4-5層であり、10は十分なマージン。
+  無限ループ防止のための安全策。
+
+  ## エッジケース
+
+  - 循環リンクが存在する場合 → 訪問済み集合で検出し無限ループを防止
+  - 起点アイテムが既に非活性 → そのまま下流に処理を続行

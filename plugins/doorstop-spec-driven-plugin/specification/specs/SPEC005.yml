@@ -1,0 +1,29 @@
+active: true
+derived: false
+groups:
+- QUERY
+header: |
+  照会 — list / groups / tree / find
+level: 1.4
+links:
+- ARCH002: iIBAqEjUeITsv4opOr_iW8MB6j8pi3JCmLm12ziD86o=
+normative: true
+reviewed: null
+text: |
+  ## インターフェース
+
+  ```python
+  cmd_list(tree, args)    # args: doc, group, all
+  cmd_groups(tree, args)  # args: (なし)
+  cmd_tree(tree, args)    # args: (なし)
+  cmd_find(tree, args)    # args: uid
+  ```
+
+  ## 振る舞い
+
+  - **list**: ドキュメント内のアイテム一覧を返す。`--doc` でドキュメントフィルタ、
+    `--group` でグループフィルタ。デフォルトはアクティブアイテムのみ、
+    `--all` で非アクティブも含む。各アイテムは `item_summary()` で返す
+  - **groups**: 全アイテムから groups 属性を収集し、重複排除して返す
+  - **tree**: ドキュメント階層構造（prefix, parent, path）を表示する
+  - **find**: `find_item()` で UID を検索し、`item_to_dict()` で詳細を返す

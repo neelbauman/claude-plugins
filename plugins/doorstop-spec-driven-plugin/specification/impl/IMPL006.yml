@@ -1,0 +1,57 @@
+active: true
+derived: false
+groups:
+- BASELINE
+header: |
+  ベースライン実装 (baseline_manager.py)
+level: 1.5
+links:
+- SPEC009: Lr4aWOHfmT1utdd6vn4pe0l9dXt-eklHwQfBQESrpig=
+normative: true
+references:
+- path: scripts/core/baseline_manager.py
+  type: file
+reviewed: null
+text: |
+  ## 実装概要
+
+  ベースライン（仕様スナップショット）の作成・一覧・差分比較を実装する。
+
+  - **cmd_create**: ツリー全体のスナップショットを JSON ファイルとして保存する。
+    オプションで Git タグを付与できる
+  - **cmd_list**: `.baselines/` ディレクトリ内の JSON ファイルを列挙する
+  - **cmd_diff**: 2つのベースライン間（または ベースライン vs HEAD）の差分を計算する
+
+  ## 設計判断
+
+  ### JSON スナップショット形式
+
+  各アイテムの uid, prefix, header, text_snippet, groups, priority, active,
+  normative, stamp, reviewed をキャプチャする。
+  stamp はアイテムの `item.stamp()` メソッドで取得したフィンガープリントであり、
+  diff 時に内容の変更有無を判定する基準となる。
+
+  ### 保存場所の決定
+
+  `_baselines_root()` はツリーの最初のドキュメントの path から
+  `.baselines/` ディレクトリを算出する。
+  ツリーが空の場合はカレントディレクトリの `.baselines/` にフォールバックする。
+
+  ### diff の HEAD 比較
+
+  `baseline2` に `"HEAD"` を指定すると、ファイルからの読み込みではなく
+  `_take_snapshot(tree)` で現在のツリー状態をリアルタイムに取得して比較する。
+  これにより、ベースライン作成なしでの変更確認が可能。
+
+  ### 差分の4分類
+
+  diff は added（新規）、removed（削除）、changed（stamp 変更）、unchanged の
+  4カテゴリに分類する。changed には base/target の stamp 先頭8文字と
+  text_snippet の変更有無を含める。
+
+  ## 実装メモ
+
+  - `--force` フラグで既存ベースラインの上書きが可能
+  - Git タグ名はデフォルトでベースライン名を使用、`--tag-name` で変更可能
+  - summary に total_items, active_items, normative_items を含める
+  - text_snippet は先頭80文字でトランケート

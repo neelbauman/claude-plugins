@@ -1,0 +1,71 @@
+active: true
+derived: false
+groups:
+- IMPACT
+header: |
+  影響分析実装 (impact_analysis.py, impact_output.py)
+level: 1.6
+links:
+- SPEC010: lrgnkycA8oRaCbLzEyIKpYxzZLZQNkMoYK-G_EJNGCk=
+normative: true
+references:
+- path: scripts/core/impact_analysis.py
+  type: file
+- path: scripts/core/impact_output.py
+  type: file
+reviewed: null
+text: |
+  ## 実装概要
+
+  変更影響分析を「検出」「分析」「出力」の3フェーズに分離して実装する。
+
+  ### 検出フェーズ (impact_analysis.py)
+
+  3つの検出方式を提供し、複数方式の同時指定と重複排除をサポートする。
+
+  - **detect_by_uid()**: 手動指定のUIDからアイテムを取得する
+  - **detect_suspects()**: 全リンクの stamp を走査し、不一致の親アイテムを返す
+  - **detect_from_git()**: `git diff --name-only` の出力を `build_doc_file_map()` で
+    UID にマッピングする
+
+  ### 分析フェーズ (impact_analysis.py)
+
+  - **analyze_impact()**: 変更アイテムごとに上流・下流を再帰的にたどり、
+    suspect 判定とアクション生成を行う
+  - **_trace_upstream()** / **_trace_downstream()**: 再帰的走査（depth 制限 10）
+  - **_generate_actions()**: 人間向けのアクション文言を生成する
+  - **_generate_action_plan()**: エージェント向けの構造化アクションプランを生成する
+
+  ### 出力フェーズ (impact_output.py)
+
+  - **print_console()**: コンソールにツリー形式で結果を出力する。グループ別サマリ付き
+  - **write_json()**: JSON 形式で出力する。action_plan_summary を集約して付与する
+  - **write_html()**: HTML レポートを生成する。CSS 付きのカード形式で
+    上流・下流・アクションを表示する
+
+  ## 設計判断
+
+  ### アクションの層別化
+
+  `_generate_actions()` は IMPL/TST で異なる文言（「実装を確認・修正」「テストを確認・修正」）を
+  生成する。SDD 原則に基づき、まず変更アイテムのレビューを推奨し、
+  次に suspect 解消、最後に非 suspect の下流確認を提示する。
+
+  ### action_plan の構造
+
+  `_generate_action_plan()` は `review_commands`, `clear_commands`, `files_to_check`,
+  `validation` の4キーを持つ dict を返す。
+  エージェントがそのまま実行できるコマンド文字列を含む。
+
+  ### Git 検出のフォールバック
+
+  `detect_from_git()` は `git diff HEAD` が失敗した場合に
+  `git diff --staged` にフォールバックする。
+  初回コミット前のリポジトリでも動作させるための対応。
+
+  ## 実装メモ
+
+  - `_auto_execute()` は action_plan の clear → review の順でコマンドを自動実行する
+  - HTML 出力は html.escape でXSS対策済み
+  - グループ別影響サマリは changed / suspect / affected の3軸で集計する
+  - 複数検出方式の結果は `changed_map` (uid → item) で重複排除する

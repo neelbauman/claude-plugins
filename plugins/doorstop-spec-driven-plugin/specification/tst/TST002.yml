@@ -1,0 +1,71 @@
+active: true
+derived: false
+groups:
+- QUERY
+header: |
+  照会テスト
+level: 1.1
+links:
+- SPEC005: rcBuGPZae6W6OgSTZwnKQ6IIrLqhXt735OI3_s7jcEQ=
+- SPEC006: PtcDLLWyFnT0vez4o2WYCyfSNy1oa0J-_SbrHrAB8J0=
+- SPEC007: mkwjV_aDAj3zcMFTMLKVu3haV3oyPfzDbnhAjuZgHhk=
+normative: true
+references:
+- path: tests/test_trace_query/test_chain.py
+  type: file
+- path: tests/test_trace_query/test_status.py
+  type: file
+- path: tests/test_trace_query/test_search.py
+  type: file
+- path: tests/test_trace_query/test_quality.py
+  type: file
+- path: tests/test_doorstop_ops/test_query.py
+  type: file
+reviewed: null
+test_level: unit
+text: |
+  ## 目的
+
+  trace_query の照会機能（chain, context, status, coverage, gaps,
+  suspects, backlog, search）と doorstop_ops の基本照会
+  (list, groups, tree, find) が正しく動作することを検証する。
+
+  ## 検証観点
+
+  ### chain / context（test_chain.py）
+
+  - 上流チェーン: IMPL → SPEC → REQ の順で祖先をたどる
+  - 下流チェーン: REQ → SPEC → IMPL/TST の順で子孫をたどる
+  - `--file` オプション: ファイルパスからアイテムを逆引きする
+  - context: 上流＋下流の統合表示
+
+  ### status / coverage（test_status.py）
+
+  - ドキュメント別の統計（active, normative, reviewed, suspect 件数）
+  - カバレッジ計算: 親アイテムに子リンクがある割合
+  - グループ別カバレッジの内訳
+
+  ### search（test_search.py）
+
+  - document / group / priority / suspect / unreviewed / derived フィルタの各動作
+  - pattern（正規表現）フィルタ
+  - 複数フィルタの組み合わせ
+
+  ### quality: suspects / backlog（test_quality.py）
+
+  - suspect リンクの検出と一覧表示
+  - backlog のソート（priority の重みマップ: critical=5, high=4, ...）
+  - `--all-docs` フラグでの全ドキュメント走査
+
+  ### 基本照会（test_query.py）
+
+  - list: 指定ドキュメントのアイテム一覧
+  - groups: ドキュメント内のグループ一覧
+  - tree: ドキュメント階層の表示
+  - find: UID によるアイテム検索
+
+  ## 主要シナリオ
+
+  - simple_tree を使った正常系の各照会結果確認
+  - suspect_tree を使った suspect 検出の確認
+  - 空ツリーでの境界値テスト

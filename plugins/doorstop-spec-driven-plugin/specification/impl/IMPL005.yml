@@ -1,0 +1,58 @@
+active: true
+derived: false
+groups:
+- VALIDATE
+header: |
+  バリデーション実装 (validator.py)
+level: 1.4
+links:
+- SPEC008: w2ScuCVJQpvi0pTd3v6VeQ2jvFr5V9rxyn6Q804IU5E=
+normative: true
+references:
+- path: scripts/core/validator.py
+  type: file
+reviewed: null
+text: |
+  ## 実装概要
+
+  ドキュメントツリーの構造検証・トレーサビリティマトリクス構築・カバレッジ計算を
+  3つの関数に分離して実装する。
+
+  - **validate_tree()**: 7カテゴリの検証を実行し、errors / warnings / info に分類して返す
+  - **build_traceability_matrix()**: ルートドキュメントから再帰的に展開し、
+    全ドキュメント層を横断するマトリクスを構築する
+  - **compute_coverage()**: ドキュメントペア別・グループ別のカバレッジ（被覆率）を計算する
+
+  ## 設計判断
+
+  ### 7カテゴリの検証
+
+  validate_tree は以下の順序で検証を実行する:
+
+  1. **空テキスト**: active かつ normative なアイテムの text が空なら warning
+  2. **親ドキュメント存在**: 子ドキュメントの parent が存在しなければ error
+  3. **親リンク欠落**: 親ドキュメントへのリンクがなければ warning
+  4. **リンク先不存在**: リンク先 UID が親ドキュメントに存在しなければ error
+  5. **クロスグループ**: 子と親のグループが交差しなければ warning
+  6. **逆方向チェック（strict）**: 親アイテムに子からのリンクがなければ warning
+  7. **derived チェック**: IMPL/TST での derived: true は error、REQ は warning
+
+  inactive / non-normative なアイテムは全検証でスキップする。
+
+  ### references 存在チェック
+
+  IMPL/TST ドキュメントに限定して、references のファイルパスが
+  実際のファイルシステム上に存在するかを `os.path.exists()` で検証する。
+  `path::function` 形式は `::` 前で分割してファイルパスのみを検証する。
+
+  ### マトリクスの再帰展開
+
+  build_traceability_matrix は、ルートドキュメントのアイテムを行として開始し、
+  `expand_children()` で子ドキュメントを再帰的に展開する。
+  1つの親に複数の子がリンクする場合は行を複製する。
+
+  ## 実装メモ
+
+  - レビュー状態チェックは info レベルで出力（未レビュー件数と先頭10件のUID）
+  - coverage の uncovered_items はソート済みリストで返す
+  - グループ別カバレッジは `defaultdict(lambda: {"total": set(), "covered": set()})` で集約

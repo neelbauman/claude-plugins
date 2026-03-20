@@ -1,0 +1,53 @@
+active: true
+derived: false
+groups:
+- BASELINE
+header: |
+  ベースラインテスト
+level: 1.3
+links:
+- SPEC009: Lr4aWOHfmT1utdd6vn4pe0l9dXt-eklHwQfBQESrpig=
+normative: true
+references:
+- path: tests/test_baseline_manager.py
+  type: file
+reviewed: null
+test_level: unit
+text: |
+  ## 目的
+
+  baseline_manager のスナップショット作成・一覧・差分比較が
+  正しく動作することを検証する。
+
+  ## 検証観点
+
+  ### 内部関数
+
+  - `_baselines_root()`: ツリーから `.baselines/` パスを正しく算出する
+  - `_snapshot_item()`: アイテムの uid, prefix, header, groups, priority, stamp 等を
+    正しくキャプチャする
+  - `_take_snapshot()`: ツリー全体の全アイテムをキャプチャする
+
+  ### cmd_create
+
+  - JSON ファイルが `.baselines/<name>.json` に作成される
+  - summary に total_items, active_items, normative_items が含まれる
+  - `--force` なしでの既存ベースライン上書き拒否
+  - Git コミットハッシュの取得
+
+  ### cmd_list
+
+  - ベースラインなしの場合は空リスト
+  - 作成済みベースラインの name, created_at, summary が返される
+
+  ### cmd_diff
+
+  - added / removed / changed / unchanged の4分類が正しい
+  - stamp 変更の検出
+  - HEAD 比較モードの動作
+
+  ## 主要シナリオ
+
+  - create → list → diff の一連の操作フロー
+  - 空ツリーでの create
+  - 2つのベースライン間の diff で added / changed を検出

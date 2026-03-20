@@ -1,0 +1,58 @@
+active: true
+derived: false
+gherkin: |
+  Scenario: チェーンクリア（下流方向）
+    Given SPEC001 の REQ001 へのリンクが suspect 状態
+    And SPEC001 → IMPL001 のチェーンが存在する
+    When chain-clear SPEC001 を実行する
+    Then SPEC001 以下のすべての suspect が解消される
+
+  Scenario: チェーンレビュー（上流方向）
+    Given IMPL001 → SPEC001 → REQ001 のチェーンが存在する
+    When chain-review IMPL001 を実行する
+    Then IMPL001 から REQ001 までの全アイテムがレビュー済みになる
+groups:
+- CRUD
+header: |
+  レビュー — review / clear
+level: 1.3
+links:
+- ARCH002: iIBAqEjUeITsv4opOr_iW8MB6j8pi3JCmLm12ziD86o=
+normative: true
+reviewed: null
+text: |
+  ## インターフェース
+
+  ```python
+  cmd_review(tree, args)        # args: uid
+  cmd_clear(tree, args)         # args: uid
+  cmd_chain_review(tree, args)  # args: uids (リスト)
+  cmd_chain_clear(tree, args)   # args: uids (リスト)
+  ```
+
+  ## 振る舞い
+
+  ### cmd_review / cmd_clear
+
+  - review: `item.review()` で reviewed フラグを現在の stamp に設定する
+  - clear: suspect リンクの stamp を更新して整合性問題を解消する
+
+  ### cmd_chain_review（上流方向）
+
+  1. 起点 UID から BFS で parents_map（上流リンク）をたどる
+  2. 訪問済み集合で循環リンクに対応する
+  3. 収集した全アイテムに対して `item.review()` を実行する
+
+  ### cmd_chain_clear（下流方向）
+
+  1. 起点 UID から BFS で children_map（下流リンク）をたどる
+  2. 各アイテムの suspect_links を特定する
+  3. `item.clear(suspect_links)` でクリアする
+
+  ## 設計判断
+
+  ### レビューは上流、クリアは下流
+
+  review は「上位仕様の確認を確定する」操作であるため上流方向に走査する。
+  clear は「実装・テストの修正完了を宣言する」操作であるため下流方向に走査する。
+  これは SDD のレビューワークフロー（仕様変更→影響確認→実装修正→テスト修正→クリア）に合致する。

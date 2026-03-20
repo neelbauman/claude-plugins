@@ -1,0 +1,46 @@
+active: true
+derived: false
+groups:
+- MCP
+header: |
+  MCP ツールテスト
+level: 1.9
+links:
+- SPEC014: dBGZeq3AMv2rUsMkljGxS1Z650xP9un9UgW8lc8ka7k=
+normative: true
+references: []
+reviewed: null
+test_level: integration
+text: |
+  ## 目的
+
+  MCP アダプタ・ツール定義が正しく動作し、コア機能を正しく呼び出せることを検証する。
+
+  ## 検証観点
+
+  ### アダプタ層
+
+  - **get_tree**: キャッシュミス時に doorstop.build() を呼び出す。
+    キャッシュヒット時はビルドをスキップする
+  - **invalidate_cache**: 指定 project_dir のキャッシュ削除。引数なしで全キャッシュクリア
+  - **call_cmd**: stdout キャプチャ + SystemExit キャッチで JSON dict を返す。
+    JSON パース失敗時の raw_output フォールバック
+  - **call_cmd_no_tree**: ツリーを引数に取らない関数の呼び出し
+  - **call_cmd_write**: 実行後のキャッシュ無効化
+
+  ### ツール登録
+
+  - 各 `@mcp.tool()` が `{"ok": true/false, ...}` 形式で応答する
+  - エラー時に適切なエラーメッセージを返す
+  - 読み取り操作で call_cmd、書き込み操作で call_cmd_write が使われる
+
+  ### cwd の復元
+
+  - call_cmd 内で project_dir に chdir し、finally で元の cwd に戻す
+  - 例外発生時でも cwd が復元される
+
+  ## 主要シナリオ
+
+  - 読み取り操作（list, tree, find 等）のレスポンス形式確認
+  - 書き込み操作（add, update, link 等）後のキャッシュ無効化確認
+  - エラーケース（不正なUID、不正なドキュメント名等）のエラーレスポンス確認

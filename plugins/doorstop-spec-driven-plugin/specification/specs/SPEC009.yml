@@ -1,0 +1,62 @@
+active: true
+derived: false
+gherkin: |
+  Scenario: ベースライン作成と差分
+    Given 10件のアクティブアイテムが存在する
+    When baseline create v1.0 を実行する
+    And アイテムを1件追加・1件変更する
+    And baseline diff v1.0 を実行する
+    Then added=1, changed=1 の差分が表示される
+
+  Scenario: HEAD との比較
+    Given ベースライン v1.0 が作成済みである
+    When baseline diff v1.0 HEAD を実行する
+    Then 現在の状態との差分が表示される
+groups:
+- BASELINE
+header: |
+  ベースライン管理
+level: 1.8
+links:
+- ARCH001: 6V58o4EBEy-3KpYNjAHFp2NTAFlWb5nYpmX5DCX2iE4=
+normative: true
+reviewed: null
+text: |
+  ## インターフェース
+
+  ```python
+  cmd_create(tree, args)  # args: name, tag(optional)
+  cmd_list(tree, args)    # args: (なし)
+  cmd_diff(tree, args)    # args: name1, name2(optional, default="HEAD")
+  ```
+
+  ## 振る舞い
+
+  ### cmd_create
+
+  アクティブアイテムのスナップショットを JSON ファイルとして保存する。
+
+  保存先: `<spec-dir>/.baselines/<name>.json`
+
+  保存内容:
+  - `name`: ベースライン名
+  - `created_at`: 作成日時（ISO 8601）
+  - `git_commit`: 現在の Git コミットハッシュ
+  - `git_tag`: `--tag` 指定時のタグ名
+  - `summary`: 統計（total_items, active_items, normative_items）
+  - `items`: 各アイテムの UID, prefix, header, text_snippet(先頭80文字),
+    groups, priority, active, normative, stamp, reviewed
+
+  ### cmd_list
+
+  `.baselines/` ディレクトリのファイル一覧を返す。
+
+  ### cmd_diff
+
+  2つの状態を比較し、差分を算出する。`name2` 省略時は現在の状態（HEAD）と比較。
+
+  差分カテゴリ:
+  - **added**: 比較先に存在し、基準に無いアイテム（active かつ normative）
+  - **removed**: 基準に存在し、比較先に無いアイテム
+  - **changed**: stamp が異なるアイテム（text_changed フラグ付き）
+  - **unchanged**: stamp が同一のアイテム

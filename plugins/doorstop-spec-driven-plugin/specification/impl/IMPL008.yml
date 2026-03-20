@@ -1,0 +1,61 @@
+active: true
+derived: false
+groups:
+- GLOSSARY
+header: |
+  用語辞書実装 (glossary.py)
+level: 1.7
+links:
+- SPEC011: 40VwDYnSROnVzgBsE0Jl4073Dym1mleZBdc5dGFMTPM=
+normative: true
+references:
+- path: scripts/core/glossary.py
+  type: file
+reviewed: null
+text: |
+  ## 実装概要
+
+  YAML ベースの用語辞書を Doorstop とは独立して管理する。
+  6つのコマンド関数で CRUD と使用状況分析を提供する。
+
+  - **cmd_add**: 用語を追加する。重複チェック（大文字小文字区別なし）付き
+  - **cmd_update**: 用語の定義・エイリアス・コンテキスト・コードを部分更新する
+  - **cmd_remove**: 用語を削除する
+  - **cmd_list**: 全用語を一覧表示する。context フィルタとソート付き
+  - **cmd_check**: REQ/SPEC 本文でエイリアス使用（表記ゆれ）を検出する
+  - **cmd_unused**: 定義済みだが仕様書で使われていない用語を検出する
+
+  ## 設計判断
+
+  ### 保存場所の自動判定
+
+  `_glossary_path()` は `specification/` ディレクトリが存在すればその下に、
+  なければプロジェクトルート直下に `glossary.yml` を配置する。
+  Doorstop のドキュメントツリーとは独立した YAML ファイルとして管理する。
+
+  ### check のスキャン対象
+
+  IMPL/TST はスキャン対象から除外する。
+  実装コードやテストコードの本文はコード寄りの表現を使うため、
+  表記ゆれ検出の対象としては不適切。
+  REQ/ARCH/SPEC/HLD/LLD のみを対象とする。
+
+  ### エイリアスマッチングの方式
+
+  `cmd_check` は `re.compile(re.escape(alias), re.IGNORECASE)` で
+  エイリアスの出現を正規表現で検出する。
+  正式名称との混在チェックは複雑すぎるため実装せず、
+  エイリアスの使用箇所のみを報告する。
+
+  ### unused の全文結合方式
+
+  `cmd_unused` は全ドキュメントの text + header + gherkin を結合した文字列で
+  `term.lower() in all_text_lower` による包含チェックを行う。
+  単語境界は考慮しない（日本語用語では単語境界が不明確なため）。
+
+  ## 実装メモ
+
+  - 用語エントリの構造: term, definition, aliases (list), context, code
+  - `_find_term()` は大文字小文字を区別しない検索（`term.lower()` 比較）
+  - cmd_add / cmd_update / cmd_remove は `_save_glossary()` で YAML 永続化
+  - cmd_check / cmd_unused は doorstop.build() でツリーを構築する

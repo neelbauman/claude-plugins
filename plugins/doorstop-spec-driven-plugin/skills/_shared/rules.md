@@ -14,6 +14,7 @@
 10. 仕様変更のコミットはドキュメント層ごとに分ける
 11. 新ドメイン概念には `glossary.py add` で用語辞書を更新する
 12. 重要な設計判断は ADR に記録する
+13. **Doorstop YAML を Edit/Write で直接編集しない** — 必ず MCP ツール (`sdd_add_item`, `sdd_update_item` 等) または CLI (`doorstop_ops.py`) 経由で操作する。フックにより直接編集はブロックされる
 
 ## エージェント規約
 

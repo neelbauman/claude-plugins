@@ -1,0 +1,60 @@
+active: true
+derived: false
+groups:
+- COMMON
+header: |
+  共通ユーティリティテスト
+level: 1.6
+links:
+- SPEC013: GGPJBs7FgB1Fepc_cjTGfQNulprldZkrfgFCYS5zukE=
+normative: true
+references:
+- path: tests/test_common.py
+  type: file
+reviewed: null
+test_level: unit
+text: |
+  ## 目的
+
+  _common.py の全ヘルパー関数（出力・属性アクセス・ツリーナビゲーション・
+  リンクインデックス・シリアライゼーション）が正しく動作することを検証する。
+
+  ## 検証観点
+
+  ### out()
+
+  - ok: true で exit(0)、ok: false で exit(1)
+  - ok キーなしのデフォルト動作（exit(0)）
+  - 日本語を含む JSON の正しいシリアライズ
+
+  ### 属性アクセサー
+
+  - **get_groups**: リスト型返却、文字列のカンマ分割、未設定時のデフォルト
+  - **get_ref**: ref 属性の取得、未設定時の空文字列
+  - **get_references**: references → ref のフォールバック。両方なしで空リスト
+  - **get_references_display**: type が file 以外の場合の種別付記
+  - **is_derived** / **is_normative**: bool 値の正しい判定
+  - **get_priority**: 6段階の有効値判定、デフォルト "medium"
+
+  ### ツリーナビゲーション
+
+  - **find_item**: 存在するUID / 存在しないUID。include_inactive=True での非アクティブ検索
+  - **find_doc_prefix**: アイテムのプレフィックス特定
+  - **is_suspect**: stamp 一致（正常）/ 不一致（suspect）の判定
+
+  ### リンクインデックス
+
+  - **build_link_index**: children / parents の双方向マップ構築。
+    include_inactive での非アクティブアイテム含有
+
+  ### シリアライゼーション
+
+  - **item_summary**: text のトランケート、suspect 判定の含有
+  - **item_to_dict**: gherkin, references, level の完全出力
+  - **build_doc_file_map**: ファイルパス → UID のマッピング
+
+  ## 主要シナリオ
+
+  - MockItem / MockLink を使った各関数の単体テスト
+  - simple_tree / suspect_tree フィクスチャを使った統合的な動作確認
+  - capture_out フィクスチャを使った out() の JSON キャプチャ

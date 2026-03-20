@@ -1,0 +1,54 @@
+active: true
+derived: false
+gherkin: |
+  Scenario: リンク作成
+    Given SPEC001 と REQ001 が存在する
+    When link SPEC001 REQ001 を実行する
+    Then SPEC001 の links に REQ001 が追加される
+    And リンクの stamp が初期化される
+
+  Scenario: リンク削除
+    Given SPEC001 が REQ001 にリンクされている
+    When unlink SPEC001 REQ001 を実行する
+    Then SPEC001 の links から REQ001 が削除される
+
+  Scenario: 存在しない UID へのリンク
+    Given SPEC001 が存在する
+    When link SPEC001 INVALID_UID を実行する
+    Then エラーが返される
+groups:
+- CRUD
+header: |
+  CRUD 操作 — link / unlink
+level: 1.1
+links:
+- ARCH002: iIBAqEjUeITsv4opOr_iW8MB6j8pi3JCmLm12ziD86o=
+normative: true
+reviewed: null
+text: |
+  ## インターフェース
+
+  ```python
+  cmd_link(tree, args)    # args: child_uid, parent_uid
+  cmd_unlink(tree, args)  # args: child_uid, parent_uid
+  ```
+
+  ## 振る舞い
+
+  ### cmd_link
+
+  1. child_uid と parent_uid の両方のアイテムを検索する
+  2. `item.link(parent_uid)` でリンクを作成する
+  3. `item.clear([parent_uid])` で stamp を初期化する（suspect 防止）
+  4. `item.save()` で永続化する
+
+  ### cmd_unlink
+
+  1. child_uid と parent_uid の両方のアイテムを検索する
+  2. `item.unlink(parent_uid)` でリンクを削除する
+  3. `item.save()` で永続化する
+
+  ## エラーハンドリング
+
+  - child_uid または parent_uid が存在しない → エラー
+  - 既に存在するリンクの重複追加 → Doorstop API の挙動に依存

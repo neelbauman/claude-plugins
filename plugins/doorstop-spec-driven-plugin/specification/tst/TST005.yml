@@ -1,0 +1,53 @@
+active: true
+derived: false
+groups:
+- IMPACT
+header: |
+  影響分析テスト
+level: 1.4
+links:
+- SPEC010: lrgnkycA8oRaCbLzEyIKpYxzZLZQNkMoYK-G_EJNGCk=
+normative: true
+references:
+- path: tests/test_impact_analysis.py
+  type: file
+reviewed: null
+test_level: unit
+text: |
+  ## 目的
+
+  impact_analysis の3つの検出方式（手動・suspect・Git）と
+  影響分析・アクション生成が正しく動作することを検証する。
+
+  ## 検証観点
+
+  ### 検出方式
+
+  - **detect_by_uid**: 存在するUIDのアイテム取得、存在しないUIDの warning 出力
+  - **detect_suspects**: suspect リンクから変更された親アイテムを正しく返す。
+    suspect がない場合は空リスト
+  - 複数方式の同時指定と重複排除
+
+  ### 走査
+
+  - **_trace_upstream**: parents_idx を使って祖先をたどる。depth 情報の正確性
+  - **_trace_downstream**: children_idx を使って子孫をたどる。
+    循環リンク時の visited による無限ループ防止
+  - depth 制限（max_depth=10）での打ち切り
+
+  ### 分析
+
+  - **analyze_impact**: 変更アイテムの上流・下流・suspect_children の構造
+  - references / ref の取得
+
+  ### アクション生成
+
+  - **_generate_actions**: IMPL/TST で異なる文言の生成
+  - **_generate_action_plan**: review_commands, clear_commands, files_to_check,
+    validation の4キーの構造化出力
+
+  ## 主要シナリオ
+
+  - simple_tree + suspect_tree を使った検出→分析の一連の動作確認
+  - 存在しないUIDの混在テスト
+  - suspect 0件のツリーでの空結果確認

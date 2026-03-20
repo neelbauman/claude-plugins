@@ -1,0 +1,69 @@
+active: true
+derived: false
+groups:
+- QUERY
+header: |
+  照会 — status / coverage / gaps / suspects / backlog / search
+level: 1.6
+links:
+- ARCH002: iIBAqEjUeITsv4opOr_iW8MB6j8pi3JCmLm12ziD86o=
+normative: true
+reviewed: null
+text: |
+  ## インターフェース
+
+  ```python
+  cmd_status(tree, args)    # args: (なし)
+  cmd_coverage(tree, args)  # args: (なし)
+  cmd_gaps(tree, args)      # args: (なし)
+  cmd_suspects(tree, args)  # args: (なし)
+  cmd_backlog(tree, args)   # args: all_docs, document, group
+  cmd_search(tree, args)    # args: pattern, document, group, priority,
+                            #        suspect, unreviewed, has_gherkin, derived
+  ```
+
+  ## 振る舞い
+
+  ### cmd_status
+
+  ドキュメントごとの統計（count / reviewed / unreviewed / suspects）、
+  子→親ドキュメント間のカバレッジ率、グループ一覧を返す。
+
+  ### cmd_coverage
+
+  `covered_count / total × 100` で算出。
+  子ドキュメントから親ドキュメントへのリンク有無を基準とする。
+  `by_group` でグループ別の内訳も提供する。
+
+  ### cmd_gaps
+
+  3種類の欠落を検出する:
+  - **missing_links**: REQ 以外で親リンクが未設定のアイテム
+  - **missing_refs**: IMPL/TST で references が未設定のアイテム
+  - **orphan_children**: 子ドキュメントが存在するのにリンクがないアイテム
+
+  ### cmd_suspects
+
+  suspect リンクを持つアイテムを一覧し、対応アクションを提示する:
+  - IMPL → 「ソースコードを確認・修正 → doorstop clear UID」
+  - TST → 「テストを確認・修正 → doorstop clear UID」
+  - SPEC → 「親 REQ との整合確認 → doorstop clear UID」
+
+  ### cmd_backlog
+
+  優先度順（critical > high > medium > low > none > done）でソートして返す。
+  `--all-docs` で全ドキュメント対象（デフォルトは REQ のみ）。
+  `has_children` フラグで下流カバー状態を示す。
+
+  ### cmd_search
+
+  多軸フィルタリングパイプライン:
+  1. document フィルタ（カンマ区切り）
+  2. group フィルタ（カンマ区切り、AND 条件）
+  3. priority フィルタ（カンマ区切り）
+  4. suspect / unreviewed / has_gherkin / derived フラグ
+  5. pattern 正規表現（text + header + gherkin を対象）
+
+  ## エラーハンドリング
+
+  - search の正規表現コンパイル失敗 → 即座にエラーを返す

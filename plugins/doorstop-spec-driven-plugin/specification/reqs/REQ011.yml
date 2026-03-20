@@ -1,0 +1,32 @@
+active: true
+derived: false
+groups:
+- REPORT
+header: |
+  レポート・ダッシュボード
+level: '1.10'
+links: []
+normative: true
+priority: medium
+reviewed: null
+text: |
+  ## 概要
+
+  仕様の状態を HTML レポートおよび Web ダッシュボードで可視化できること。
+
+  ## 背景・動機
+
+  CLI やMCP ツールの出力はエージェント向けだが、人間のステークホルダーには
+  視覚的なレポートが必要である。バリデーション結果やトレーサビリティマトリクスを
+  HTML で閲覧可能にすることで、レビューやリリース判定の効率を向上させる。
+
+  ## 受入基準
+
+  - バリデーション結果を HTML レポートとして出力できる
+  - トレーサビリティマトリクスを HTML で表示できる
+  - Flask ベースの Web ダッシュボードを起動できる
+
+  ## スコープ外
+
+  - PDF エクスポート
+  - リアルタイム更新（WebSocket 等）

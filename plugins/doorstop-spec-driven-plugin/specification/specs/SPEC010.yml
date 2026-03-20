@@ -1,0 +1,74 @@
+active: true
+derived: false
+gherkin: |
+  Scenario: Git ベースの影響分析
+    Given REQ001 の YAML ファイルが Git で変更されている
+    When impact --from-git を実行する
+    Then REQ001 が changed_items に含まれる
+    And REQ001 の下流（ARCH, SPEC, IMPL, TST）が impacted_items に含まれる
+
+  Scenario: suspect ベースの影響検出
+    Given SPEC001 が suspect リンクを持つ
+    When impact --detect-suspects を実行する
+    Then SPEC001 の親アイテムが changed_items として検出される
+
+  Scenario: 手動指定
+    Given REQ001 が存在する
+    When impact --changed REQ001 を実行する
+    Then REQ001 の下流チェーンが impacted_items に含まれる
+groups:
+- IMPACT
+header: |
+  変更影響分析
+level: 1.9
+links:
+- ARCH001: 6V58o4EBEy-3KpYNjAHFp2NTAFlWb5nYpmX5DCX2iE4=
+normative: true
+reviewed: null
+text: |
+  ## インターフェース
+
+  ```python
+  analyze_impact(project_dir, changed=None, detect_suspects=False,
+                 from_git=False, base=None)  # → dict
+  format_impact(result, fmt="console"|"json"|"html")  # → str
+  ```
+
+  内部検出関数:
+  ```python
+  detect_by_uid(tree, uids)                          # 手動指定
+  detect_suspects(tree)                               # suspect 検出
+  detect_from_git(tree, project_dir, base_ref=None)   # Git 検出
+  ```
+
+  ## 振る舞い
+
+  ### 3つの検出方式
+
+  1. **手動指定**: `changed=[UID...]` で変更元を直接指定
+  2. **suspect 検出**: `detect_suspects=True` で suspect リンクを持つアイテムから変更元を特定
+  3. **Git 検出**: `from_git=True` で `git diff` から変更された YAML ファイルを特定し、
+     `build_doc_file_map()` で UID にマッピング
+
+  ### 分析フロー
+
+  1. 検出方式に基づいて changed_items を収集する
+  2. 各 changed_item について上流・下流チェーンをたどる
+  3. 影響を受けるアイテムを impacted_items に集約する
+  4. 変更元→影響先のチェーンを impact_chains として構築する
+
+  ### 出力構造
+
+  - `changed_items`: 変更元アイテムのリスト
+  - `impacted_items`: 影響を受けるアイテム（直接・間接）
+  - `impact_chains`: 変更元→影響先のトレーサビリティチェーン
+
+  ### 出力形式
+
+  - **console**: 人間が読みやすいテキスト形式
+  - **json**: 機械処理用の JSON 形式
+  - **html**: レポート用の HTML 形式
+
+  ## エラーハンドリング
+
+  - Git リポジトリでない場合の --from-git → 警告を出力し空結果を返す

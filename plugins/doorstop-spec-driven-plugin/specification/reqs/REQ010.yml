@@ -1,0 +1,39 @@
+active: true
+derived: false
+groups:
+- MCP
+header: |
+  MCP サーバーインターフェース
+level: 1.9
+links: []
+normative: true
+priority: critical
+reviewed: null
+text: |
+  ## 概要
+
+  すべての仕様操作を MCP（Model Context Protocol）ツールとして公開し、
+  Claude Code エージェントから呼び出せること。
+
+  ## 背景・動機
+
+  MCP は AI エージェントがツールにアクセスするための標準プロトコルである。
+  Claude Code から SDD の全操作を呼び出せるようにすることで、
+  仕様策定→設計→実装→テストの自律的なワークフローを実現する。
+
+  ## 受入基準
+
+  - FastMCP による stdio サーバーとして動作する
+  - CRUD、照会、検証、影響分析、ベースライン、用語辞書、初期化の全操作がツールとして利用可能
+  - CLI スクリプトと同等の機能を MCP ツール経由で実行できる
+
+  ## 制約事項
+
+  - トランスポートは stdio のみ（HTTP/SSE は対象外）
+  - レスポンスは JSON シリアライズ可能な dict 形式
+  - 全ツールは project_dir を必須引数として受け取る
+
+  ## スコープ外
+
+  - HTTP/SSE トランスポート対応
+  - MCP リソース（resources）の提供
