@@ -1,5 +1,5 @@
 ---
-name: conventions
+name: doorstop-spec-driven:conventions
 description: >
   SDD のコミット規約・命名規約を提供する背景知識。
   コミット作成時やドキュメント層ごとの分割が必要なときに自動参照される。

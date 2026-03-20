@@ -1,5 +1,5 @@
 ---
-name: bugfix
+name: doorstop-spec-driven:bugfix
 description: >
   バグの修正を行うフロー。
   「〜が動かない」「エラーが出る」「クラッシュする」「TypeError」「例外が発生」

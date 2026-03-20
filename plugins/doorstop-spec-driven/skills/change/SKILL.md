@@ -1,5 +1,5 @@
 ---
-name: change
+name: doorstop-spec-driven:change
 description: >
   既存の仕様・設計・実装に対する意図的な変更を行うフロー。
   「仕様を変えたい」「振る舞いを変えたい」「機能を改善して」「リファクタリングして」

@@ -1,5 +1,5 @@
 ---
-name: new
+name: doorstop-spec-driven:new
 description: >
   新機能の追加・新要件の実装を行う仕様駆動開発フロー。
   「〜を作って」「〜を実装して」「新機能を追加して」「〜が欲しい」

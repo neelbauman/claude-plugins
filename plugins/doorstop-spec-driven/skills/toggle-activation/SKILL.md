@@ -1,5 +1,5 @@
 ---
-name: deactivate
+name: doorstop-spec-driven:deactivate
 description: >
   機能削除・要件取り下げを行うフロー。
   「〜を削除して」「〜を廃止して」「この機能はもう要らない」

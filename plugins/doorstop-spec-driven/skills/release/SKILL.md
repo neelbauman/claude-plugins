@@ -1,5 +1,5 @@
 ---
-name: release
+name: doorstop-spec-driven:release
 description: >
   リリース前の品質チェック・ゲート判定を行うフロー。
   「リリースしたい」「リリースチェックして」「リリース前の確認」

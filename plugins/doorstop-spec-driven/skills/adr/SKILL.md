@@ -1,5 +1,5 @@
 ---
-name: adr
+name: doorstop-spec-driven:adr
 description: >
   設計判断・意思決定をADR（Architecture Decision Record）に記録するフロー。
   「ADRを書いて」「判断を記録して」「なぜこうしたか残したい」

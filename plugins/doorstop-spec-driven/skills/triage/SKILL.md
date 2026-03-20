@@ -1,5 +1,5 @@
 ---
-name: triage
+name: doorstop-spec-driven:triage
 description: >
   要件の優先度付け・バックログ整理・スコープ確定を行うフロー。
   「何から手をつけるか」「優先順位を決めたい」「バックログを整理して」

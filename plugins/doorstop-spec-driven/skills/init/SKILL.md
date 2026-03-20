@@ -1,5 +1,5 @@
 ---
-name: init
+name: doorstop-spec-driven:init
 description: >
   新規（グリーンフィールド）プロジェクトに仕様駆動開発を導入するフロー。
   「プロジェクトを始めたい」「ゼロから仕様駆動開発を始めたい」

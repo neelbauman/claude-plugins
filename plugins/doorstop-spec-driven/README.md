@@ -22,13 +22,13 @@ Claude Code プラグイン — Doorstop による仕様駆動開発（Specifica
 ## インストール
 
 ```bash
-claude plugins add /path/to/doorstop-spec-driven-plugin
+claude plugins add /path/to/doorstop-spec-driven
 ```
 
 開発中のローカルテストには `--plugin-dir` を使います。
 
 ```bash
-claude --plugin-dir /path/to/doorstop-spec-driven-plugin
+claude --plugin-dir /path/to/doorstop-spec-driven
 ```
 
 プラグインを有効化した後、`/reload-plugins` で再読み込みできます。
@@ -210,7 +210,7 @@ SDD に関する質問をすると自動的に起動します。
 ## ディレクトリ構成
 
 ```
-doorstop-spec-driven-plugin/
+doorstop-spec-driven/
 ├── .claude-plugin/
 │   └── plugin.json           # プラグインマニフェスト
 ├── agents/

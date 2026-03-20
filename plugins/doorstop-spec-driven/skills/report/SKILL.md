@@ -1,5 +1,5 @@
 ---
-name: report
+name: doorstop-spec-driven:report
 description: >
   プロジェクトの状況確認・レポート生成を行うフロー。
   「状況を教えて」「カバレッジは？」「suspectある？」「レポートを見せて」
